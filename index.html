@@ -492,6 +492,10 @@ function setUser(u) {
   currentUser = u;
   document.querySelectorAll('.user-btn').forEach(b => b.classList.toggle('active', b.textContent === u));
   renderAll();
+  // FCMトークンを新しいユーザーで再登録
+  if (typeof fcmToken !== 'undefined' && fcmToken && db) {
+    db.ref('fcmTokens/' + u).set({ token: fcmToken, updatedAt: Date.now() });
+  }
 }
 
 function showTab(tab) {
@@ -1035,16 +1039,7 @@ async function initFCM() {
 // ※ FCMのサーバー送信はFirebase Functions or Cloud Runが必要なため
 // ここではフォアグラウンド通知（アプリを開いてる相手への通知）のみ対応
 // バックグラウンド通知はfirebase-messaging-sw.jsで処理
-
-// ユーザー切り替え時にトークンを更新
-const _origSetUser = setUser;
-function setUser(u) {
-  _origSetUser(u);
-  // トークンを新しいユーザーで再登録
-  if (fcmToken && db) {
-    db.ref('fcmTokens/' + u).set({ token: fcmToken, updatedAt: Date.now() });
-  }
-}
+// ユーザー切り替え時にFCMトークンを更新（setUser本体で処理）
 
 // PWAインストール案内（iOS）
 function showPWAInstallHint() {
