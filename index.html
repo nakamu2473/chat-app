@@ -525,7 +525,6 @@ function renderChat() {
   }
   el.innerHTML = state.chat.map(m => `
     <div class="msg-wrap ${m.user === currentUser ? 'me' : 'other'}">
-      <div class="msg-name">${esc(m.user)}</div>
       <div class="msg-bubble">${esc(m.text)}</div>
       <div class="msg-time">${esc(m.time)}</div>
     </div>
