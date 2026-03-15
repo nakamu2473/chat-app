@@ -10,13 +10,12 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <!-- 設定ファイル（config.js が存在しない場合はデモモードで動作） -->
+<script src="config.js"></script>
 <script>
-  // config.js が読み込まれていない場合のフォールバック
   if (typeof APP_CONFIG === 'undefined') {
     window.APP_CONFIG = null;
   }
 </script>
-<script src="config.js" onerror="window.APP_CONFIG=null;"></script>
 
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
