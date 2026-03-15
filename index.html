@@ -13,7 +13,7 @@
 <script src="config.js"></script>
 <script>
   if (typeof APP_CONFIG === 'undefined') {
-    window.APP_CONFIG = null;
+    APP_CONFIG = null;
   }
 </script>
 
@@ -310,11 +310,11 @@ let state = { chat: [], shop: [], memo: [], events: [] };
 //  FIREBASE or localStorage
 // ============================================================
 let db = null;
-const useFirebase = !!(window.APP_CONFIG && window.APP_CONFIG.firebase && window.APP_CONFIG.firebase.apiKey !== 'YOUR_API_KEY');
+const useFirebase = !!(APP_CONFIG && APP_CONFIG.firebase && APP_CONFIG.firebase.apiKey !== 'YOUR_API_KEY');
 
 if (useFirebase) {
   try {
-    firebase.initializeApp(window.APP_CONFIG.firebase);
+    firebase.initializeApp(APP_CONFIG.firebase);
     db = firebase.database();
   } catch(e) {
     console.error('Firebase init error:', e);
@@ -397,7 +397,7 @@ async function initialLoad() {
   }
 
   // Googleカレンダー読み込み
-  if (window.APP_CONFIG && window.APP_CONFIG.calendars) {
+  if (APP_CONFIG && APP_CONFIG.calendars) {
     document.getElementById('gcal-bar').style.display = 'flex';
     loadGcalEvents();
   }
@@ -737,11 +737,11 @@ function parseIcal(text, calName) {
 }
 
 async function loadGcalEvents() {
-  if (!window.APP_CONFIG || !window.APP_CONFIG.calendars) return;
+  if (!APP_CONFIG || !APP_CONFIG.calendars) return;
   const statusEl = document.getElementById('gcal-status');
   statusEl.textContent = '読み込み中…';
   gcalEvents = [];
-  const cals = Object.values(window.APP_CONFIG.calendars);
+  const cals = Object.values(APP_CONFIG.calendars);
   let ok = 0;
   for (const cal of cals) {
     if (!cal.icalUrl || cal.icalUrl.includes('XXXXXXXX')) continue;
