@@ -4,23 +4,26 @@
 //  config.js は .gitignore に含まれています（GitHubに上がりません）
 // ============================================================
 
-const APP_CONFIG = {
+window.APP_CONFIG = {
 
   // ---------- Firebase ----------
-  // Firebase Console > プロジェクトの設定 > マイアプリ > SDK の設定と構成
   firebase: {
     apiKey:            "YOUR_API_KEY",
     authDomain:        "YOUR_PROJECT.firebaseapp.com",
-    databaseURL:       "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    databaseURL:       "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app/",
     projectId:         "YOUR_PROJECT",
     storageBucket:     "YOUR_PROJECT.appspot.com",
     messagingSenderId: "YOUR_SENDER_ID",
     appId:             "YOUR_APP_ID",
   },
 
+  // ---------- FCM（プッシュ通知）----------
+  // Firebase Console > プロジェクトの設定 > Cloud Messaging > ウェブプッシュ証明書 > キーペア
+  fcm: {
+    vapidKey: "YOUR_VAPID_KEY",
+  },
+
   // ---------- Googleカレンダー（読み込みのみ） ----------
-  // Googleカレンダー > 設定 > カレンダーの統合 > シークレットアドレス（iCal形式）
-  // ※ シークレットアドレスは他人に見せないように！
   calendars: {
     yuki: {
       name: "ゆき",
