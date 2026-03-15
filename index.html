@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ふたりのアプリ</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<!-- 設定ファイル（config.js が存在しない場合はデモモードで動作） -->
+<script>
+  // config.js が読み込まれていない場合のフォールバック
+  if (typeof APP_CONFIG === 'undefined') {
+    window.APP_CONFIG = null;
+  }
+</script>
+<script src="config.js" onerror="window.APP_CONFIG=null;"></script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5e0;
+    --text: #1a1a1a;
+    --text-muted: #888880;
+    --accent: #3d6b5e;
+    --accent-light: #e8f0ed;
+    --accent2: #c4773b;
+    --accent2-light: #faf0e8;
+    --danger: #c0392b;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    flex-shrink: 0;
+    gap: 8px;
+  }
+  .app-title { font-size: 15px; font-weight: 700; color: var(--accent); letter-spacing: 0.04em; white-space: nowrap; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .sync-indicator { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; transition: background 0.3s; }
+  .sync-dot.ok { background: #4caf50; }
+  .sync-dot.syncing { background: var(--accent2); animation: pulse 0.8s infinite; }
+  .sync-dot.error { background: var(--danger); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .user-switch { display: flex; gap: 6px; }
+  .user-btn { padding: 4px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; font-family: inherit; cursor: pointer; color: var(--text-muted); transition: all 0.18s; }
+  .user-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 500; }
+
+  /* TABS */
+  nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; flex-shrink: 0; }
+  .tab { flex: 1; padding: 12px 4px; text-align: center; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.18s; display: flex; flex-direction: column; align-items: center; gap: 3px; letter-spacing: 0.03em; }
+  .tab .icon { font-size: 18px; }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  main { flex: 1; overflow: hidden; }
+  .page { display: none; height: 100%; flex-direction: column; overflow: hidden; }
+  .page.active { display: flex; }
+
+  .section-inner { flex: 1; overflow-y: auto; padding: 16px; }
+  .input-bar { padding: 12px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: flex-end; }
+  .input-bar input { flex: 1; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 14px; font-family: inherit; outline: none; background: var(--bg); color: var(--text); transition: border-color 0.15s; }
+  .input-bar input:focus { border-color: var(--accent); }
+  .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; transition: opacity 0.15s; }
+  .btn-send:hover { opacity: 0.85; }
+
+  /* CHAT */
+  .chat-messages { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
+  .msg-wrap { display: flex; flex-direction: column; max-width: 72%; animation: fadeUp 0.2s ease; }
+  .msg-wrap.me { align-self: flex-end; align-items: flex-end; }
+  .msg-wrap.other { align-self: flex-start; align-items: flex-start; }
+  .msg-name { font-size: 10px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
+  .msg-bubble { padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
+  .msg-wrap.me .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg-wrap.other .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg-time { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+  /* SHOP */
+  .shop-section { padding: 0 0 16px; }
+  .shop-section h3 { font-size: 12px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 10px; }
+  .shop-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 6px; animation: fadeUp 0.2s ease; transition: opacity 0.2s; }
+  .shop-item.checked { opacity: 0.45; }
+  .shop-item.checked .item-text { text-decoration: line-through; }
+  .shop-check { width: 20px; height: 20px; border-radius: 6px; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; background: transparent; font-size: 12px; }
+  .shop-item.checked .shop-check { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .item-text { flex: 1; font-size: 14px; }
+  .item-who { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--accent-light); color: var(--accent); }
+  .item-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 16px; padding: 0 2px; transition: color 0.15s; }
+  .item-del:hover { color: var(--danger); }
+
+  /* MEMO */
+  .memo-item { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; animation: fadeUp 0.2s ease; }
+  .memo-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .memo-tag { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; padding: 2px 7px; border-radius: 8px; }
+  .memo-tag.todo { background: var(--accent2-light); color: var(--accent2); }
+  .memo-tag.memo { background: var(--accent-light); color: var(--accent); }
+  .memo-who { font-size: 11px; font-weight: 600; color: var(--text-muted); margin-left: auto; }
+  .memo-text { font-size: 14px; line-height: 1.5; }
+  .memo-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; transition: color 0.15s; }
+  .memo-del:hover { color: var(--danger); }
+  .memo-done-check { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; background: transparent; transition: all 0.15s; }
+  .memo-item.done .memo-done-check { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .memo-item.done .memo-text { text-decoration: line-through; opacity: 0.5; }
+  .memo-type-toggle { display: flex; gap: 6px; margin-bottom: 8px; }
+  .type-btn { padding: 5px 14px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 12px; cursor: pointer; font-family: inherit; color: var(--text-muted); transition: all 0.15s; }
+  .type-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; font-weight: 600; }
+
+  /* CALENDAR */
+  .cal-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 10px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .cal-month { font-size: 16px; font-weight: 700; }
+  .cal-nav { background: none; border: none; font-size: 18px; cursor: pointer; color: var(--text-muted); padding: 4px 8px; border-radius: 6px; transition: background 0.15s; }
+  .cal-nav:hover { background: var(--bg); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 10px 12px; flex-shrink: 0; }
+  .cal-dow { text-align: center; font-size: 11px; font-weight: 700; color: var(--text-muted); padding: 4px 0; letter-spacing: 0.05em; }
+  .cal-day { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 5px; font-size: 13px; border-radius: 8px; cursor: pointer; transition: background 0.12s; gap: 2px; }
+  .cal-day:hover { background: var(--accent-light); }
+  .cal-day.today { background: var(--accent); color: #fff; font-weight: 700; }
+  .cal-day.other-month { color: var(--border); cursor: default; }
+  .dot-row { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+  .cal-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent2); flex-shrink: 0; }
+  .cal-dot.me { background: var(--accent); }
+  .cal-dot.gcal { background: #4285f4; }
+  .cal-events { flex: 1; overflow-y: auto; padding: 12px 16px; }
+  .cal-event-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 8px; margin-bottom: 6px; animation: fadeUp 0.2s ease; }
+  .cal-event-item.other-user { border-left-color: var(--accent2); }
+  .cal-event-item.gcal-event { border-left-color: #4285f4; }
+  .event-date-badge { text-align: center; min-width: 36px; }
+  .eday { font-size: 18px; font-weight: 700; line-height: 1; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .cal-event-item.other-user .eday { color: var(--accent2); }
+  .cal-event-item.gcal-event .eday { color: #4285f4; }
+  .emon { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+  .event-info { flex: 1; }
+  .event-title { font-size: 14px; font-weight: 500; }
+  .event-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .event-del { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; transition: color 0.15s; }
+  .event-del:hover { color: var(--danger); }
+
+  /* Gcal refresh button */
+  .gcal-bar { padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  .gcal-bar button { padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border); background: transparent; font-size: 11px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+  .gcal-bar button:hover { background: var(--accent-light); }
+
+  /* DEMO BANNER */
+  .demo-banner { background: var(--accent2-light); border-bottom: 1px solid #e8c89a; padding: 8px 16px; font-size: 12px; color: var(--accent2); text-align: center; flex-shrink: 0; }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
+  .empty .big { font-size: 32px; margin-bottom: 8px; }
+
+  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; font-size: 12px; padding: 8px 16px; border-radius: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; z-index: 999; }
+  .toast.show { opacity: 1; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<!-- config.js がない場合のデモバナー（JS で制御） -->
+<div class="demo-banner" id="demo-banner" style="display:none;">
+  ⚠️ config.js が見つかりません。デモモード（ローカル保存）で動作中です。
+</div>
+
+<header>
+  <div class="app-title">🏠 ふたりのアプリ</div>
+  <div class="header-right">
+    <div class="sync-indicator">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">起動中…</span>
+    </div>
+    <div class="user-switch">
+      <button class="user-btn active" onclick="setUser('ゆき')">ゆき</button>
+      <button class="user-btn" onclick="setUser('たけ')">たけ</button>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="tab active" onclick="showTab('chat')"><span class="icon">💬</span>チャット</div>
+  <div class="tab" onclick="showTab('shop')"><span class="icon">🛒</span>買い物</div>
+  <div class="tab" onclick="showTab('memo')"><span class="icon">📝</span>メモ/TODO</div>
+  <div class="tab" onclick="showTab('cal')"><span class="icon">📅</span>カレンダー</div>
+</nav>
+
+<main>
+  <!-- CHAT -->
+  <div class="page active" id="page-chat">
+    <div class="section-inner" id="chat-scroll">
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+    <div class="input-bar">
+      <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="btn-send" onclick="sendChat()">送信</button>
+    </div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="page" id="page-shop">
+    <div class="section-inner">
+      <div class="shop-section"><h3>未購入</h3><div id="shop-pending"></div></div>
+      <div class="shop-section"><h3>購入済み</h3><div id="shop-done"></div></div>
+    </div>
+    <div class="input-bar">
+      <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter')addShopItem()">
+      <button class="btn-send" onclick="addShopItem()">追加</button>
+    </div>
+  </div>
+
+  <!-- MEMO -->
+  <div class="page" id="page-memo">
+    <div class="section-inner"><div id="memo-list"></div></div>
+    <div class="input-bar" style="flex-direction:column;gap:8px;">
+      <div class="memo-type-toggle">
+        <button class="type-btn active" id="type-btn-memo" onclick="setMemoType('memo')">📝 メモ</button>
+        <button class="type-btn" id="type-btn-todo" onclick="setMemoType('todo')">✅ TODO</button>
+      </div>
+      <div style="display:flex;gap:8px;width:100%;">
+        <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter')addMemo()">
+        <button class="btn-send" onclick="addMemo()">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div class="page" id="page-cal">
+    <div class="cal-header">
+      <button class="cal-nav" onclick="calPrev()">‹</button>
+      <div class="cal-month" id="cal-month-label"></div>
+      <button class="cal-nav" onclick="calNext()">›</button>
+    </div>
+    <div class="gcal-bar" id="gcal-bar" style="display:none;">
+      <span>📅 Googleカレンダー連携中</span>
+      <button onclick="loadGcalEvents()">🔄 更新</button>
+      <span id="gcal-status" style="margin-left:auto;"></span>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="cal-events" id="cal-events"></div>
+    <div class="input-bar">
+      <input type="date" id="cal-date" style="flex:0 0 130px;font-family:inherit;font-size:13px;">
+      <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter')addEvent()">
+      <button class="btn-send" onclick="addEvent()">追加</button>
+    </div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  UTILS
+// ============================================================
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function fmtTime(d) {
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+function setSyncStatus(status, label) {
+  document.getElementById('sync-dot').className = 'sync-dot ' + status;
+  document.getElementById('sync-label').textContent = label;
+}
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentUser = 'ゆき';
+let memoType = 'memo';
+let calYear, calMonth;
+let currentTab = 'chat';
+let gcalEvents = []; // Googleカレンダーから取得したイベント
+
+// アプリ内で管理するイベント（Firebase / localStorage）
+let state = { chat: [], shop: [], memo: [], events: [] };
+
+// ============================================================
+//  FIREBASE or localStorage
+// ============================================================
+let db = null;
+const useFirebase = !!(window.APP_CONFIG && window.APP_CONFIG.firebase && window.APP_CONFIG.firebase.apiKey !== 'YOUR_API_KEY');
+
+if (useFirebase) {
+  try {
+    firebase.initializeApp(window.APP_CONFIG.firebase);
+    db = firebase.database();
+  } catch(e) {
+    console.error('Firebase init error:', e);
+  }
+} else {
+  document.getElementById('demo-banner').style.display = 'block';
+}
+
+// ---------- Firebase helpers ----------
+function fbRef(path) { return db ? db.ref(path) : null; }
+
+function fbSet(path, value) {
+  if (db) return fbRef(path).set(value);
+  // localStorage fallback
+  try { localStorage.setItem('futari_' + path.replace(/\//g,'_'), JSON.stringify(value)); } catch(e) {}
+  return Promise.resolve();
+}
+
+function fbGet(path) {
+  if (db) return fbRef(path).get().then(s => s.exists() ? s.val() : null);
+  try {
+    const raw = localStorage.getItem('futari_' + path.replace(/\//g,'_'));
+    return Promise.resolve(raw ? JSON.parse(raw) : null);
+  } catch(e) { return Promise.resolve(null); }
+}
+
+// ---------- Firebase realtime listeners ----------
+function setupRealtimeListeners() {
+  if (!db) return;
+
+  db.ref('chat').on('value', snap => {
+    const val = snap.val();
+    state.chat = val ? Object.values(val).sort((a,b) => (a.ts||0)-(b.ts||0)) : [];
+    if (currentTab === 'chat') renderChat();
+    setSyncStatus('ok', '同期済み');
+  });
+
+  db.ref('shop').on('value', snap => {
+    const val = snap.val();
+    state.shop = val ? Object.values(val) : [];
+    if (currentTab === 'shop') renderShop();
+  });
+
+  db.ref('memo').on('value', snap => {
+    const val = snap.val();
+    state.memo = val ? Object.values(val).sort((a,b) => (b.ts||0)-(a.ts||0)) : [];
+    if (currentTab === 'memo') renderMemo();
+  });
+
+  db.ref('events').on('value', snap => {
+    const val = snap.val();
+    state.events = val ? Object.values(val) : [];
+    if (currentTab === 'cal') renderCal();
+  });
+}
+
+// ============================================================
+//  INITIAL LOAD
+// ============================================================
+async function initialLoad() {
+  setSyncStatus('syncing', '読み込み中…');
+
+  if (useFirebase && db) {
+    // Firebase: リアルタイムリスナーに任せる
+    setupRealtimeListeners();
+    setSyncStatus('ok', '同期済み');
+  } else {
+    // localStorage fallback
+    try {
+      const [chat, shop, memo, events] = await Promise.all([
+        fbGet('chat'), fbGet('shop'), fbGet('memo'), fbGet('events')
+      ]);
+      state.chat   = chat   ? (Array.isArray(chat)   ? chat   : Object.values(chat))   : [];
+      state.shop   = shop   ? (Array.isArray(shop)   ? shop   : Object.values(shop))   : [];
+      state.memo   = memo   ? (Array.isArray(memo)   ? memo   : Object.values(memo))   : [];
+      state.events = events ? (Array.isArray(events) ? events : Object.values(events)) : [];
+    } catch(e) {}
+    setSyncStatus('ok', 'ローカル保存');
+    renderAll();
+  }
+
+  // Googleカレンダー読み込み
+  if (window.APP_CONFIG && window.APP_CONFIG.calendars) {
+    document.getElementById('gcal-bar').style.display = 'flex';
+    loadGcalEvents();
+  }
+}
+
+// ============================================================
+//  USER / TABS
+// ============================================================
+function setUser(u) {
+  currentUser = u;
+  document.querySelectorAll('.user-btn').forEach(b => b.classList.toggle('active', b.textContent === u));
+  renderAll();
+}
+
+function showTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  document.querySelectorAll('.tab')[['chat','shop','memo','cal'].indexOf(tab)].classList.add('active');
+  if (tab === 'cal') renderCal();
+  if (tab === 'chat') renderChat();
+  if (tab === 'shop') renderShop();
+  if (tab === 'memo') renderMemo();
+}
+
+function renderAll() {
+  renderChat();
+  renderShop();
+  renderMemo();
+  if (currentTab === 'cal') renderCal();
+}
+
+// ============================================================
+//  CHAT
+// ============================================================
+function renderChat() {
+  const el = document.getElementById('chat-messages');
+  if (!state.chat.length) {
+    el.innerHTML = '<div class="empty"><div class="big">💬</div>まだメッセージがないよ</div>';
+    return;
+  }
+  el.innerHTML = state.chat.map(m => `
+    <div class="msg-wrap ${m.user === currentUser ? 'me' : 'other'}">
+      <div class="msg-name">${esc(m.user)}</div>
+      <div class="msg-bubble">${esc(m.text)}</div>
+      <div class="msg-time">${esc(m.time)}</div>
+    </div>
+  `).join('');
+  const scroll = document.getElementById('chat-scroll');
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+async function sendChat() {
+  const inp = document.getElementById('chat-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  const msg = { id: uid(), user: currentUser, text, time: fmtTime(new Date()), ts: Date.now() };
+  inp.value = '';
+  if (db) {
+    await db.ref('chat/' + msg.id).set(msg);
+  } else {
+    state.chat.push(msg);
+    await fbSet('chat', state.chat);
+    renderChat();
+  }
+}
+
+// ============================================================
+//  SHOP
+// ============================================================
+function renderShop() {
+  const pending = document.getElementById('shop-pending');
+  const done = document.getElementById('shop-done');
+  const p = state.shop.filter(i => !i.checked);
+  const d = state.shop.filter(i => i.checked);
+  pending.innerHTML = p.length ? p.map(shopItemHtml).join('') : '<div class="empty" style="padding:12px 0;font-size:13px;">✓ 全部揃ってる！</div>';
+  done.innerHTML = d.map(shopItemHtml).join('');
+}
+
+function shopItemHtml(item) {
+  return `<div class="shop-item ${item.checked ? 'checked' : ''}">
+    <div class="shop-check" onclick="toggleShop('${item.id}')">${item.checked ? '✓' : ''}</div>
+    <span class="item-text">${esc(item.text)}</span>
+    <span class="item-who">${esc(item.who)}</span>
+    <button class="item-del" onclick="delShop('${item.id}')">✕</button>
+  </div>`;
+}
+
+async function addShopItem() {
+  const inp = document.getElementById('shop-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  const item = { id: uid(), text, who: currentUser, checked: false, ts: Date.now() };
+  inp.value = '';
+  if (db) {
+    await db.ref('shop/' + item.id).set(item);
+  } else {
+    state.shop.push(item);
+    await fbSet('shop', state.shop);
+    renderShop();
+  }
+}
+
+async function toggleShop(id) {
+  const item = state.shop.find(i => i.id === id);
+  if (!item) return;
+  item.checked = !item.checked;
+  if (db) {
+    await db.ref('shop/' + id + '/checked').set(item.checked);
+  } else {
+    await fbSet('shop', state.shop);
+    renderShop();
+  }
+}
+
+async function delShop(id) {
+  if (db) {
+    await db.ref('shop/' + id).remove();
+  } else {
+    state.shop = state.shop.filter(i => i.id !== id);
+    await fbSet('shop', state.shop);
+    renderShop();
+  }
+}
+
+// ============================================================
+//  MEMO
+// ============================================================
+function setMemoType(t) {
+  memoType = t;
+  document.getElementById('type-btn-memo').classList.toggle('active', t === 'memo');
+  document.getElementById('type-btn-todo').classList.toggle('active', t === 'todo');
+}
+
+function renderMemo() {
+  const el = document.getElementById('memo-list');
+  if (!state.memo.length) {
+    el.innerHTML = '<div class="empty"><div class="big">📝</div>まだ何もないよ</div>';
+    return;
+  }
+  el.innerHTML = state.memo.map(m => `
+    <div class="memo-item ${m.done ? 'done' : ''}">
+      <div class="memo-header">
+        ${m.type === 'todo' ? `<div class="memo-done-check" onclick="toggleMemo('${m.id}')">${m.done ? '✓' : ''}</div>` : ''}
+        <span class="memo-tag ${m.type}">${m.type === 'todo' ? 'TODO' : 'メモ'}</span>
+        <span class="memo-who">${esc(m.who)}</span>
+        <button class="memo-del" onclick="delMemo('${m.id}')">✕</button>
+      </div>
+      <div class="memo-text">${esc(m.text)}</div>
+    </div>
+  `).join('');
+}
+
+async function addMemo() {
+  const inp = document.getElementById('memo-input');
+  const text = inp.value.trim();
+  if (!text) return;
+  const item = { id: uid(), type: memoType, text, who: currentUser, done: false, ts: Date.now() };
+  inp.value = '';
+  if (db) {
+    await db.ref('memo/' + item.id).set(item);
+  } else {
+    state.memo.unshift(item);
+    await fbSet('memo', state.memo);
+    renderMemo();
+  }
+}
+
+async function toggleMemo(id) {
+  const item = state.memo.find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  if (db) {
+    await db.ref('memo/' + id + '/done').set(item.done);
+  } else {
+    await fbSet('memo', state.memo);
+    renderMemo();
+  }
+}
+
+async function delMemo(id) {
+  if (db) {
+    await db.ref('memo/' + id).remove();
+  } else {
+    state.memo = state.memo.filter(i => i.id !== id);
+    await fbSet('memo', state.memo);
+    renderMemo();
+  }
+}
+
+// ============================================================
+//  CALENDAR
+// ============================================================
+const DOW = ['日','月','火','水','木','金','土'];
+const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+function initCal() {
+  const today = new Date();
+  calYear = today.getFullYear();
+  calMonth = today.getMonth();
+  document.getElementById('cal-date').value = todayStr();
+}
+
+function renderCal() {
+  document.getElementById('cal-month-label').textContent = calYear + '年 ' + MONTHS[calMonth];
+  const grid = document.getElementById('cal-grid');
+  let html = DOW.map(d => `<div class="cal-dow">${d}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const days  = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  for (let i = 0; i < first; i++) html += `<div class="cal-day other-month"></div>`;
+  for (let d = 1; d <= days; d++) {
+    const dateStr = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday = today.getFullYear()===calYear && today.getMonth()===calMonth && today.getDate()===d;
+    const appEvs  = state.events.filter(e => e.date === dateStr);
+    const gcEvs   = gcalEvents.filter(e => e.date === dateStr);
+    const dots = [
+      ...appEvs.map(e => `<div class="cal-dot ${e.who === currentUser ? 'me' : ''}"></div>`),
+      ...gcEvs.map(() => `<div class="cal-dot gcal"></div>`),
+    ].join('');
+    html += `<div class="cal-day ${isToday ? 'today' : ''}" onclick="calSelectDay('${dateStr}')">
+      ${d}
+      ${dots ? `<div class="dot-row">${dots}</div>` : ''}
+    </div>`;
+  }
+  grid.innerHTML = html;
+  renderEvents(null);
+}
+
+function calSelectDay(dateStr) {
+  document.getElementById('cal-date').value = dateStr;
+  renderEvents(dateStr);
+}
+
+function renderEvents(filterDate) {
+  const el = document.getElementById('cal-events');
+  let appEvs = [...state.events];
+  let gcEvs  = [...gcalEvents];
+  if (filterDate) {
+    appEvs = appEvs.filter(e => e.date === filterDate);
+    gcEvs  = gcEvs.filter(e  => e.date === filterDate);
+  }
+  const all = [
+    ...appEvs.map(e => ({ ...e, _type: 'app' })),
+    ...gcEvs.map(e  => ({ ...e, _type: 'gcal' })),
+  ].sort((a,b) => a.date.localeCompare(b.date));
+
+  if (!all.length) {
+    el.innerHTML = '<div class="empty"><div class="big">📅</div>予定がないよ</div>';
+    return;
+  }
+  el.innerHTML = all.map(ev => {
+    const [,m,d] = ev.date.split('-');
+    const isGcal = ev._type === 'gcal';
+    const cls = isGcal ? 'gcal-event' : (ev.who !== currentUser ? 'other-user' : '');
+    return `<div class="cal-event-item ${cls}">
+      <div class="event-date-badge">
+        <div class="eday">${parseInt(d)}</div>
+        <div class="emon">${parseInt(m)}月</div>
+      </div>
+      <div class="event-info">
+        <div class="event-title">${esc(ev.title)}</div>
+        <div class="event-meta">${isGcal ? ('📅 ' + esc(ev.who)) : esc(ev.who)}</div>
+      </div>
+      ${!isGcal ? `<button class="event-del" onclick="delEvent('${ev.id}')">✕</button>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function calPrev() { calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCal(); }
+function calNext() { calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCal(); }
+
+async function addEvent() {
+  const dateEl = document.getElementById('cal-date');
+  const inp = document.getElementById('cal-input');
+  const text = inp.value.trim();
+  if (!text || !dateEl.value) return;
+  const ev = { id: uid(), date: dateEl.value, title: text, who: currentUser, ts: Date.now() };
+  inp.value = '';
+  if (db) {
+    await db.ref('events/' + ev.id).set(ev);
+  } else {
+    state.events.push(ev);
+    await fbSet('events', state.events);
+    renderCal();
+  }
+}
+
+async function delEvent(id) {
+  if (db) {
+    await db.ref('events/' + id).remove();
+  } else {
+    state.events = state.events.filter(e => e.id !== id);
+    await fbSet('events', state.events);
+    renderCal();
+  }
+}
+
+// ============================================================
+//  GOOGLE CALENDAR (iCal 読み込み)
+// ============================================================
+// CORS回避のためcorsproxy.io経由で取得
+const CORS_PROXY = 'https://corsproxy.io/?';
+
+async function fetchIcal(url) {
+  const res = await fetch(CORS_PROXY + encodeURIComponent(url));
+  if (!res.ok) throw new Error('fetch failed: ' + res.status);
+  return res.text();
+}
+
+function parseIcal(text, calName) {
+  const events = [];
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  let ev = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('BEGIN:VEVENT')) { ev = {}; continue; }
+    if (line.startsWith('END:VEVENT') && ev) {
+      if (ev.date && ev.title) events.push({ ...ev, who: calName, id: 'gcal_' + uid() });
+      ev = null; continue;
+    }
+    if (!ev) continue;
+    if (line.startsWith('SUMMARY:')) {
+      ev.title = line.slice(8).trim();
+    } else if (line.startsWith('DTSTART')) {
+      // DTSTART;VALUE=DATE:20260405 or DTSTART:20260405T...
+      const val = line.split(':').slice(1).join(':').trim();
+      const raw = val.slice(0,8);
+      if (raw.length === 8 && /^\d+$/.test(raw)) {
+        ev.date = raw.slice(0,4)+'-'+raw.slice(4,6)+'-'+raw.slice(6,8);
+      }
+    }
+  }
+  return events;
+}
+
+async function loadGcalEvents() {
+  if (!window.APP_CONFIG || !window.APP_CONFIG.calendars) return;
+  const statusEl = document.getElementById('gcal-status');
+  statusEl.textContent = '読み込み中…';
+  gcalEvents = [];
+  const cals = Object.values(window.APP_CONFIG.calendars);
+  let ok = 0;
+  for (const cal of cals) {
+    if (!cal.icalUrl || cal.icalUrl.includes('XXXXXXXX')) continue;
+    try {
+      const text = await fetchIcal(cal.icalUrl);
+      const evs  = parseIcal(text, cal.name);
+      gcalEvents = gcalEvents.concat(evs);
+      ok++;
+    } catch(e) {
+      console.warn('Gcal fetch error:', cal.name, e);
+    }
+  }
+  statusEl.textContent = ok > 0 ? `${gcalEvents.length}件取得` : 'エラー';
+  if (currentTab === 'cal') renderCal();
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+initCal();
+initialLoad();
+</script>
+</body>
+</html>
