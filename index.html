@@ -92,10 +92,12 @@
   .page.active { display: flex; }
 
   .section-inner { flex: 1; overflow-y: auto; padding: 16px; min-height: 0; }
-  .input-bar { padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-shrink: 0; position: sticky; bottom: 0; z-index: 10; width: 100%; box-sizing: border-box; }
-  .input-bar input { flex: 1; border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 16px; font-family: inherit; outline: none; background: var(--bg); color: var(--text); transition: border-color 0.15s; }
-  .input-bar input:focus { border-color: var(--accent); }
-  .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0; }
+  .input-bar { padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; position: sticky; bottom: 0; z-index: 10; width: 100%; box-sizing: border-box; }
+  .input-wrap { display: flex; align-items: center; border: 1.5px solid var(--border); border-radius: 24px; background: var(--bg); padding: 4px 4px 4px 14px; transition: border-color 0.15s; gap: 4px; }
+  .input-wrap:focus-within { border-color: var(--accent); }
+  .input-bar input { flex: 1; border: none; background: transparent; padding: 6px 0; font-size: 16px; font-family: inherit; outline: none; color: var(--text); min-width: 0; }
+  .input-bar input:focus { border-color: transparent; }
+  .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 20px; padding: 7px 14px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0; }
   .btn-send:hover { opacity: 0.85; }
 
   /* CHAT */
@@ -249,8 +251,10 @@
       <div class="chat-messages" id="chat-messages"></div>
     </div>
     <div class="input-bar">
-      <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendChat()">
-      <button class="btn-send" onclick="sendChat()">送信</button>
+      <div class="input-wrap">
+        <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-send" onclick="sendChat()">送信</button>
+      </div>
     </div>
   </div>
 
@@ -261,8 +265,10 @@
       <div class="shop-section"><h3>購入済み</h3><div id="shop-done"></div></div>
     </div>
     <div class="input-bar">
-      <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter')addShopItem()">
-      <button class="btn-send" onclick="addShopItem()">追加</button>
+      <div class="input-wrap">
+        <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter')addShopItem()">
+        <button class="btn-send" onclick="addShopItem()">追加</button>
+      </div>
     </div>
   </div>
 
@@ -275,8 +281,10 @@
         <button class="type-btn" id="type-btn-todo" onclick="setMemoType('todo')">✅ TODO</button>
       </div>
       <div style="display:flex;gap:8px;width:100%;">
-        <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter')addMemo()">
-        <button class="btn-send" onclick="addMemo()">追加</button>
+        <div class="input-wrap">
+          <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter')addMemo()">
+          <button class="btn-send" onclick="addMemo()">追加</button>
+        </div>
       </div>
     </div>
   </div>
@@ -296,9 +304,11 @@
     <div class="cal-grid" id="cal-grid"></div>
     <div class="cal-events" id="cal-events"></div>
     <div class="input-bar">
-      <input type="date" id="cal-date" style="flex:0 0 130px;font-family:inherit;font-size:13px;">
-      <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter')addEvent()">
-      <button class="btn-send" onclick="addEvent()">追加</button>
+      <div class="input-wrap" style="flex:1;">
+        <input type="date" id="cal-date" style="flex:0 0 110px;font-family:inherit;font-size:13px;border:none;background:transparent;outline:none;">
+        <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter')addEvent()" style="flex:1;">
+        <button class="btn-send" onclick="addEvent()">追加</button>
+      </div>
     </div>
   </div>
 
@@ -315,11 +325,13 @@
       <div class="photo-grid" id="photo-grid"></div>
     </div>
     <div class="input-bar" style="gap:8px;">
-      <input type="text" id="photo-caption" placeholder="コメント（任意）" style="flex:1;">
-      <label class="btn-upload">
-        📷 追加
-        <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
-      </label>
+      <div class="input-wrap" style="flex:1;">
+        <input type="text" id="photo-caption" placeholder="コメント（任意）">
+        <label class="btn-send" style="cursor:pointer;">
+          📷
+          <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
+        </label>
+      </div>
     </div>
   </div>
 </main>
