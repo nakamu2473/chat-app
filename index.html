@@ -99,6 +99,8 @@
   .input-bar input:focus { border-color: transparent; }
   .btn-send { background: var(--accent); color: #fff; border: none; border-radius: 20px; padding: 7px 14px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; transition: opacity 0.15s; flex-shrink: 0; }
   .btn-send:hover { opacity: 0.85; }
+  .btn-upload { background: var(--accent); color: #fff; border: none; border-radius: 20px; padding: 7px 14px; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; }
+  .btn-upload:hover { opacity: 0.85; }
 
   /* CHAT */
   .chat-messages { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
@@ -324,11 +326,11 @@
     <div class="section-inner">
       <div class="photo-grid" id="photo-grid"></div>
     </div>
-    <div class="input-bar" style="gap:8px;">
+    <div class="input-bar">
       <div class="input-wrap" style="flex:1;">
         <input type="text" id="photo-caption" placeholder="コメント（任意）">
-        <label class="btn-send" style="cursor:pointer;">
-          📷
+        <label class="btn-upload">
+          📷 追加
           <input type="file" id="photo-input" accept="image/*" style="display:none;" onchange="uploadPhoto(this)">
         </label>
       </div>
