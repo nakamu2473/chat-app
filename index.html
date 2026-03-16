@@ -13,6 +13,9 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="theme-color" content="#3d6b5e">
 
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -188,6 +191,13 @@
   .toast.show { opacity: 1; }
 
 
+
+  .tag-filter-bar { padding:10px 16px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; gap:6px; overflow-x:auto; flex-shrink:0; }
+  .tag-filter-bar::-webkit-scrollbar { display:none; }
+  .tag-chip { padding:4px 12px; border-radius:20px; border:1.5px solid var(--border); background:transparent; font-size:12px; font-family:inherit; cursor:pointer; white-space:nowrap; color:var(--text-muted); transition:all 0.15s; flex-shrink:0; }
+  .tag-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
+  .photo-tags { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+  .photo-tag { font-size:10px; background:var(--accent-light); color:var(--accent); border-radius:8px; padding:2px 7px; font-weight:600; }
   /* ALBUM */
   .album-toolbar { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .album-sort-btns { display: flex; gap: 6px; }
@@ -214,6 +224,104 @@
   .photo-overlay-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
   .photo-overlay-caption { color: #fff; font-size: 14px; margin-top: 12px; text-align: center; }
   .upload-progress { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; font-size: 12px; padding: 8px 20px; border-radius: 20px; z-index: 999; white-space: nowrap; }
+
+  .water-section { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .water-section-title { font-size:12px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
+  .water-btns { display:flex; gap:6px; }
+  /* ===== CATS ===== */
+  .cats-top { display:flex; flex-direction:column; gap:12px; padding:16px; overflow-y:auto; height:100%; }
+  .cat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
+  .cat-card-header { display:flex; align-items:center; gap:12px; }
+  .cat-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; background:var(--bg); border:2px solid var(--border); flex-shrink:0; font-size:28px; display:flex; align-items:center; justify-content:center; }
+  .cat-avatar img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+  .cat-info { flex:1; }
+  .cat-name { font-size:16px; font-weight:700; }
+  .cat-age { font-size:12px; color:var(--text-muted); }
+  .cat-last-records { display:flex; gap:8px; flex-wrap:wrap; }
+  .cat-record-badge { font-size:11px; color:var(--text-muted); background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:3px 8px; }
+  .cat-quick-btns { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .cat-quick-btn { border:1.5px solid var(--border); background:var(--bg); border-radius:10px; padding:8px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:inherit; color:var(--text); display:flex; flex-direction:column; align-items:center; gap:3px; transition:all 0.15s; }
+  .cat-quick-btn:active { background:var(--accent-light); border-color:var(--accent); }
+  .cat-quick-btn .qicon { font-size:20px; }
+  .cat-detail-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; width:100%; transition:opacity 0.15s; }
+  .cat-detail-btn:hover { opacity:0.85; }
+
+  /* cat detail */
+  .cat-detail-header { background:var(--surface); border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .cat-detail-back { background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-muted); padding:0 4px; }
+  .cat-detail-name { font-size:16px; font-weight:700; flex:1; }
+  .cat-detail-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; }
+  .cat-tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); flex-shrink:0; overflow-x:auto; }
+  .cat-tab { flex-shrink:0; padding:10px 14px; font-size:11px; font-weight:500; color:var(--text-muted); cursor:pointer; border-bottom:2.5px solid transparent; white-space:nowrap; transition:all 0.15s; }
+  .cat-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+  .cat-tab-content { flex:1; overflow-y:auto; padding:16px; min-height:0; }
+
+  /* profile */
+  .profile-form { display:flex; flex-direction:column; gap:14px; }
+  .profile-avatar-wrap { display:flex; align-items:center; gap:14px; }
+  .profile-avatar-img { width:72px; height:72px; border-radius:50%; object-fit:cover; background:var(--bg); border:2px solid var(--border); font-size:36px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .profile-avatar-img img { width:100%; height:100%; border-radius:50%; object-fit:cover; }
+  .form-row { display:flex; flex-direction:column; gap:4px; }
+  .form-label { font-size:12px; font-weight:600; color:var(--text-muted); letter-spacing:0.04em; }
+  .form-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:15px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); transition:border-color 0.15s; width:100%; }
+  .form-input:focus { border-color:var(--accent); }
+  .form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .form-save-btn { background:var(--accent); color:#fff; border:none; border-radius:10px; padding:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:inherit; transition:opacity 0.15s; }
+  .form-save-btn:hover { opacity:0.85; }
+  .hospital-link { font-size:12px; color:var(--accent); text-decoration:none; margin-top:2px; display:inline-block; }
+
+  /* weight */
+  .weight-add-bar { display:flex; gap:8px; margin-bottom:16px; }
+  .weight-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:15px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); width:100px; }
+  .weight-chart-wrap { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px; margin-bottom:16px; }
+  .weight-list { display:flex; flex-direction:column; gap:6px; }
+  .weight-item { display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:8px; }
+  .weight-val { font-size:16px; font-weight:700; color:var(--accent); font-family:'DM Mono',monospace; }
+  .weight-date { font-size:12px; color:var(--text-muted); flex:1; }
+  .weight-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; }
+
+  /* food */
+  .food-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .food-name { font-size:14px; font-weight:600; }
+  .food-meta { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .food-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; float:right; }
+
+  /* medicine */
+  .med-card { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent2); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .med-name { font-size:14px; font-weight:600; }
+  .med-meta { font-size:12px; color:var(--text-muted); margin-top:2px; }
+  .med-log-btn { font-size:12px; background:var(--accent2-light); color:var(--accent2); border:1px solid var(--accent2); border-radius:6px; padding:3px 10px; cursor:pointer; font-family:inherit; margin-top:6px; }
+  .med-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; float:right; }
+
+  /* visit */
+  .visit-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .visit-date { font-size:12px; font-weight:700; color:var(--accent); font-family:'DM Mono',monospace; }
+  .visit-hospital { font-size:14px; font-weight:600; margin-top:2px; }
+  .visit-diag { font-size:13px; color:var(--text-muted); margin-top:4px; }
+  .visit-cost { font-size:12px; color:var(--accent2); font-weight:600; margin-top:2px; }
+  .visit-photos { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .visit-photo { width:64px; height:64px; border-radius:8px; object-fit:cover; cursor:pointer; }
+  .visit-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; float:right; }
+
+  /* symptom */
+  .symptom-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
+  .symptom-level { font-size:10px; font-weight:700; padding:2px 8px; border-radius:8px; display:inline-block; margin-bottom:4px; }
+  .symptom-level.low { background:#e8f5e9; color:#388e3c; }
+  .symptom-level.mid { background:#fff8e1; color:#f57f17; }
+  .symptom-level.high { background:#fce4ec; color:#c62828; }
+  .symptom-date { font-size:11px; color:var(--text-muted); font-family:'DM Mono',monospace; }
+  .symptom-text { font-size:14px; margin-top:4px; }
+  .symptom-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; float:right; }
+
+  /* modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:500; display:flex; align-items:flex-end; justify-content:center; }
+  .modal-box { background:var(--surface); border-radius:20px 20px 0 0; padding:20px; width:100%; max-width:480px; max-height:80vh; overflow-y:auto; }
+  .modal-title { font-size:16px; font-weight:700; margin-bottom:14px; }
+  .modal-btns { display:flex; gap:8px; margin-top:14px; }
+  .modal-cancel { flex:1; background:var(--bg); border:1.5px solid var(--border); border-radius:10px; padding:11px; font-size:14px; font-family:inherit; cursor:pointer; }
+  .modal-ok { flex:1; background:var(--accent); color:#fff; border:none; border-radius:10px; padding:11px; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; }
+  .select-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:15px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); width:100%; margin-bottom:8px; }
+  .textarea-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); width:100%; resize:none; min-height:80px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
 </head>
@@ -244,6 +352,7 @@
   <div class="tab" onclick="showTab('memo')"><span class="icon">📝</span>メモ/TODO</div>
   <div class="tab" onclick="showTab('cal')"><span class="icon">📅</span>カレンダー</div>
   <div class="tab" onclick="showTab('album')"><span class="icon">📸</span>アルバム</div>
+  <div class="tab" onclick="showTab('cats')"><span class="icon">🐱</span>ねこ</div>
 </nav>
 
 <main>
@@ -316,6 +425,7 @@
 
   <!-- ALBUM -->
   <div class="page" id="page-album">
+    <div class="tag-filter-bar" id="tag-filter-bar"></div>
     <div class="album-toolbar">
       <div class="album-sort-btns">
         <button class="sort-btn active" id="sort-btn-new" onclick="setAlbumSort('new')">新しい順</button>
@@ -335,6 +445,12 @@
         </label>
       </div>
     </div>
+  </div>
+
+  <!-- CATS -->
+  <div class="page" id="page-cats">
+    <div id="cats-view-top"></div>
+    <div id="cats-view-detail" style="display:none;height:100%;flex-direction:column;overflow:hidden;"></div>
   </div>
 </main>
 
@@ -378,7 +494,7 @@ let currentTab = 'chat';
 let gcalEvents = []; // Googleカレンダーから取得したイベント
 
 // アプリ内で管理するイベント（Firebase / localStorage）
-let state = { chat: [], shop: [], memo: [], events: [], photos: [] };
+let state = { chat: [], shop: [], memo: [], events: [], photos: [], cats: {}, water_log: {} };
 
 // ============================================================
 //  FIREBASE or localStorage
@@ -451,6 +567,18 @@ function setupRealtimeListeners() {
     state.photos = val ? Object.values(val) : [];
     if (currentTab === 'album') renderAlbum();
   });
+
+  db.ref('cats').on('value', snap => {
+    const val = snap.val();
+    state.cats = val || {};
+    if (currentTab === 'cats') renderCatsTop();
+  });
+
+  db.ref('water_log').on('value', snap => {
+    const val = snap.val();
+    state.water_log = val || {};
+    if (currentTab === 'cats') renderCatsTop();
+  });
 }
 
 // ============================================================
@@ -503,9 +631,10 @@ function showTab(tab) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-'+tab).classList.add('active');
-  document.querySelectorAll('.tab')[['chat','shop','memo','cal','album'].indexOf(tab)].classList.add('active');
+  document.querySelectorAll('.tab')[['chat','shop','memo','cal','album','cats'].indexOf(tab)].classList.add('active');
   if (tab === 'cal') renderCal();
   if (tab === 'album') renderAlbum();
+  if (tab === 'cats') renderCatsTop();
   if (tab === 'chat') renderChat();
   if (tab === 'shop') renderShop();
   if (tab === 'memo') renderMemo();
@@ -862,14 +991,19 @@ function setAlbumSort(sort) {
 function renderAlbum() {
   const el = document.getElementById('photo-grid');
   if (!el) return;
+
+  // タグフィルターバー描画
+  renderTagFilterBar();
+
   let photos = [...(state.photos || [])];
   if (albumSort === 'new') photos.sort((a,b) => (b.ts||0)-(a.ts||0));
   if (albumSort === 'old') photos.sort((a,b) => (a.ts||0)-(b.ts||0));
   if (albumSort === 'fav') photos = photos.filter(p => p.fav).sort((a,b) => (b.ts||0)-(a.ts||0));
+  if (albumFilterTag) photos = photos.filter(p => p.tags && p.tags.includes(albumFilterTag));
 
   if (!photos.length) {
     el.innerHTML = '<div class="empty" style="grid-column:span 2"><div class="big">📸</div>' +
-      (albumSort === 'fav' ? 'お気に入りがまだないよ' : 'まだ写真がないよ') + '</div>';
+      (albumFilterTag ? `「${albumFilterTag}」の写真がないよ` : albumSort === 'fav' ? 'お気に入りがまだないよ' : 'まだ写真がないよ') + '</div>';
     return;
   }
   el.innerHTML = photos.map(p => `
@@ -877,6 +1011,7 @@ function renderAlbum() {
       <img class="photo-img" src="${p.url}" loading="lazy" onclick="openPhotoOverlay('${p.id}')" />
       <div class="photo-info">
         ${p.caption ? `<div class="photo-caption">${esc(p.caption)}</div>` : ''}
+        ${p.tags && p.tags.length ? `<div class="photo-tags">${p.tags.map(t=>`<span class="photo-tag">${esc(t)}</span>`).join('')}</div>` : ''}
         <div class="photo-meta">
           <span class="photo-who">${esc(p.who)}</span>
           <span class="photo-date">${p.dateStr || ''}</span>
@@ -890,10 +1025,69 @@ function renderAlbum() {
   `).join('');
 }
 
+function renderTagFilterBar() {
+  const bar = document.getElementById('tag-filter-bar');
+  if (!bar) return;
+  // 使われてるタグを収集
+  const usedTags = new Set();
+  (state.photos || []).forEach(p => (p.tags||[]).forEach(t => usedTags.add(t)));
+  const allTags = [...new Set([...PRESET_TAGS, ...usedTags])].filter(t => usedTags.has(t));
+  if (!allTags.length) { bar.style.display = 'none'; return; }
+  bar.style.display = 'flex';
+  bar.innerHTML = `
+    <button class="tag-chip${!albumFilterTag?' active':''}" onclick="setAlbumTagFilter(null)">すべて</button>
+    ${allTags.map(t => `<button class="tag-chip${albumFilterTag===t?' active':''}" onclick="setAlbumTagFilter('${esc(t)}')">${esc(t)}</button>`).join('')}
+  `;
+}
+
+function setAlbumTagFilter(tag) {
+  albumFilterTag = tag;
+  renderAlbum();
+}
+
+function showTagSelectModal() {
+  return new Promise(resolve => {
+    const selected = new Set();
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    const renderChips = () => {
+      const chips = [...PRESET_TAGS].map(t =>
+        `<button class="tag-chip${selected.has(t)?' active':''}" style="margin:3px;" onclick="this.classList.toggle('active');window._tagToggle('${t}')">${esc(t)}</button>`
+      ).join('');
+      overlay.querySelector('#tag-chips').innerHTML = chips;
+    };
+    window._tagToggle = (t) => { selected.has(t) ? selected.delete(t) : selected.add(t); };
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <div class="modal-title">🏷️ タグを選択</div>
+        <div id="tag-chips" style="display:flex;flex-wrap:wrap;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <input class="form-input" id="custom-tag-input" placeholder="カスタムタグを入力" style="flex:1;">
+          <button class="btn-send" onclick="
+            const v=document.getElementById('custom-tag-input').value.trim();
+            if(v){window._tagToggle(v);if(!PRESET_TAGS.includes(v))PRESET_TAGS.push(v);document.getElementById('custom-tag-input').value='';document.querySelector('#tag-chips').insertAdjacentHTML('beforeend','<button class=\'tag-chip active\' style=\'margin:3px;\' onclick=\'this.classList.toggle(\'active\');window._tagToggle(\''+v+'\')\'>'+v+'</button>');}
+          ">追加</button>
+        </div>
+        <div class="modal-btns">
+          <button class="modal-cancel" onclick="window._tagResolve(null);this.closest('.modal-overlay').remove()">キャンセル</button>
+          <button class="modal-ok" onclick="window._tagResolve([...window._tagSelected]);this.closest('.modal-overlay').remove()">OK</button>
+        </div>
+      </div>
+    `;
+    window._tagSelected = selected;
+    window._tagResolve = resolve;
+    document.body.appendChild(overlay);
+    renderChips();
+  });
+}
+
 async function uploadPhoto(input) {
   const file = input.files[0];
   if (!file) return;
   const caption = document.getElementById('photo-caption').value.trim();
+  // タグ選択モーダルを先に出す
+  const selectedTags = await showTagSelectModal();
+  if (selectedTags === null) { input.value = ''; return; } // キャンセル
 
   if (!storage) {
     showToast('Firebase Storageが設定されてないよ');
@@ -916,7 +1110,7 @@ async function uploadPhoto(input) {
 
     const now = new Date();
     const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
-    const photo = { id: photoId, url, caption, who: currentUser, ts: Date.now(), dateStr, fav: false };
+    const photo = { id: photoId, url, caption, who: currentUser, ts: Date.now(), dateStr, fav: false, tags: selectedTags };
 
     if (db) {
       await db.ref('photos/' + photoId).set(photo);
@@ -979,6 +1173,753 @@ function openPhotoOverlay(id) {
   document.body.appendChild(overlay);
 }
 
+
+// ============================================================
+//  CATS（猫管理）
+// ============================================================
+
+const PRESET_TAGS = ['おでかけ', 'ごはん', 'おうち', '旅行', '記念日', 'ネコ氏', 'メイ', 'カル'];
+let albumFilterTag = null;
+const CAT_IDS = ['nekoshi', 'mei', 'karu'];
+const CAT_DEFAULTS = {
+  nekoshi: { name:'ネコ氏', emoji:'🐱', color:'#3d6b5e' },
+  mei:     { name:'メイ',   emoji:'🌸', color:'#e91e8c' },
+  karu:    { name:'カル',   emoji:'🍊', color:'#c4773b' },
+};
+let currentCatId = null;
+let currentCatDetailTab = 'profile';
+let weightChartInstance = null;
+
+// ---- 年齢計算 ----
+function calcAge(birthday) {
+  if (!birthday) return '';
+  const b = new Date(birthday);
+  const now = new Date();
+  const years = now.getFullYear() - b.getFullYear();
+  const months = now.getMonth() - b.getMonth();
+  const totalMonths = years * 12 + months;
+  if (totalMonths < 12) return totalMonths + 'ヶ月';
+  const y = Math.floor(totalMonths / 12);
+  const m = totalMonths % 12;
+  return m > 0 ? y + '歳' + m + 'ヶ月' : y + '歳';
+}
+
+function getCat(catId) {
+  return state.cats[catId] || {};
+}
+function getCatProfile(catId) {
+  return getCat(catId).profile || {};
+}
+
+// ---- トップ画面 ----
+function renderCatsTop() {
+  const topEl = document.getElementById('cats-view-top');
+  const detailEl = document.getElementById('cats-view-detail');
+  if (!topEl) return;
+  topEl.style.display = 'block';
+  detailEl.style.display = 'none';
+
+  const waterLogs = state.water_log ? Object.values(state.water_log) : [];
+  const lastWater1F = waterLogs.filter(l=>l.location==='1F').sort((a,b)=>b.ts-a.ts)[0] || null;
+  const lastWater2F = waterLogs.filter(l=>l.location==='2F').sort((a,b)=>b.ts-a.ts)[0] || null;
+
+  // 水セクション（共通・コンパクト）
+  const waterSection = `<div class="water-section">
+    <div class="water-section-title">💧 お水</div>
+    <div class="water-btns">
+      <button class="cat-quick-btn" style="flex:1;" onclick="logWater('1F')">
+        <span class="qicon" style="font-size:15px;">🏠</span>
+        <span style="font-size:12px;font-weight:700;">1F</span>
+        <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastWater1F ? fmtTimeAgo(lastWater1F.ts)+'（'+lastWater1F.who+'）' : '未記録'}</span>
+      </button>
+      <button class="cat-quick-btn" style="flex:1;" onclick="logWater('2F')">
+        <span class="qicon" style="font-size:15px;">🛏</span>
+        <span style="font-size:12px;font-weight:700;">2F</span>
+        <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastWater2F ? fmtTimeAgo(lastWater2F.ts)+'（'+lastWater2F.who+'）' : '未記録'}</span>
+      </button>
+    </div>
+  </div>`;
+
+  // 猫カード
+  const catCards = CAT_IDS.map(catId => {
+    const prof = getCatProfile(catId);
+    const def = CAT_DEFAULTS[catId];
+    const cat = getCat(catId);
+    const name = prof.name || def.name;
+    const age = calcAge(prof.birthday);
+    const qlogs = cat.quick_log ? Object.values(cat.quick_log) : [];
+    const lastFood = qlogs.filter(l=>l.type==='food').sort((a,b)=>b.ts-a.ts)[0] || null;
+    const lastMed  = qlogs.filter(l=>l.type==='med').sort((a,b)=>b.ts-a.ts)[0]  || null;
+    const weights  = cat.weight ? Object.values(cat.weight).sort((a,b)=>b.ts-a.ts) : [];
+    const lastWeight = weights[0] || null;
+    const todayNotes = cat.today_notes ? Object.values(cat.today_notes).sort((a,b)=>b.ts-a.ts) : [];
+    const lastNote = todayNotes[0] || null;
+    const avatarHtml = prof.icon_url
+      ? `<div class="cat-avatar"><img src="${prof.icon_url}" /></div>`
+      : `<div class="cat-avatar">${def.emoji}</div>`;
+    return `<div class="cat-card">
+      <div class="cat-card-header">
+        ${avatarHtml}
+        <div class="cat-info">
+          <div class="cat-name">${esc(name)}</div>
+          <div class="cat-age">${age}${prof.breed ? ' · '+esc(prof.breed) : ''}</div>
+        </div>
+        <button class="cat-detail-btn" style="width:auto;padding:6px 12px;font-size:12px;" onclick="openCatDetail('${catId}')">くわしく →</button>
+      </div>
+
+      <div class="cat-quick-btns">
+        <button class="cat-quick-btn" onclick="quickLog('${catId}','food')">
+          <span class="qicon">🍚</span>
+          <span style="font-size:12px;font-weight:700;">ごはん</span>
+          <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastFood ? fmtTimeAgo(lastFood.ts)+'（'+lastFood.who+'）' : '未記録'}</span>
+        </button>
+        <button class="cat-quick-btn" onclick="quickWeightModal('${catId}')">
+          <span class="qicon">⚖️</span>
+          <span style="font-size:12px;font-weight:700;">体重</span>
+          <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastWeight ? lastWeight.value+'kg（'+lastWeight.who+'）' : '未記録'}</span>
+        </button>
+        <button class="cat-quick-btn" onclick="showTodayNoteModal('${catId}')">
+          <span class="qicon">📝</span>
+          <span style="font-size:12px;font-weight:700;">今日の様子</span>
+          <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastNote ? lastNote.time+'（'+lastNote.who+'）' : '未記録'}</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  topEl.innerHTML = `<div class="cats-top">${waterSection}${catCards}</div>`;
+}
+
+function fmtTimeAgo(ts) {
+  const diff = Date.now() - ts;
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return 'たった今';
+  if (m < 60) return m + '分前';
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + '時間前';
+  return Math.floor(h / 24) + '日前';
+}
+
+async function quickLog(catId, type) {
+  const log = { id: uid(), type, ts: Date.now(), who: currentUser };
+  if (db) {
+    await db.ref(`cats/${catId}/quick_log/${log.id}`).set(log);
+  } else {
+    if (!state.cats[catId]) state.cats[catId] = {};
+    if (!state.cats[catId].quick_log) state.cats[catId].quick_log = {};
+    state.cats[catId].quick_log[log.id] = log;
+    renderCatsTop();
+  }
+  const labels = { food:'ごはんあげたよ🍚', med:'くすりあげたよ💊' };
+  showToast(labels[type] || '記録したよ！');
+}
+
+function quickWaterModal() {
+  showModal(`
+    <div class="modal-title">💧 水を替えた場所は？</div>
+    <div style="display:flex;gap:10px;margin-bottom:8px;">
+      <button class="modal-ok" style="flex:1;font-size:18px;" onclick="logWater('1F');this.closest('.modal-overlay').remove()">🏠 1F</button>
+      <button class="modal-ok" style="flex:1;font-size:18px;background:var(--accent2);" onclick="logWater('2F');this.closest('.modal-overlay').remove()">🛏 2F</button>
+    </div>
+  `, () => {});
+}
+
+
+function showTodayNoteModal(catId) {
+  const cat = getCat(catId);
+  const prof = getCatProfile(catId);
+  const def = CAT_DEFAULTS[catId];
+  const name = prof.name || def.name;
+  const notes = cat.today_notes ? Object.values(cat.today_notes).filter(n => n.date === todayStr()).sort((a,b)=>b.ts-a.ts) : [];
+  const notesList = notes.length
+    ? notes.map(n => `<div style="padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;"><span style="color:var(--text-muted);font-size:11px;">${n.time}（${esc(n.who)}）</span><br>${esc(n.text)}</div>`).join('')
+    : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">今日はまだ記録がないよ</div>';
+  showModal(`
+    <div class="modal-title">📝 ${esc(name)}の今日の様子</div>
+    <div style="margin-bottom:12px;max-height:160px;overflow-y:auto;">${notesList}</div>
+    <textarea class="textarea-input" id="today-note-text" placeholder="今日の様子を書いてね（食欲・元気・気になることなど）" style="min-height:90px;"></textarea>
+  `, async () => {
+    const text = document.getElementById('today-note-text').value.trim();
+    if (!text) return;
+    const note = {
+      id: uid(),
+      date: todayStr(),
+      time: fmtTime(new Date()),
+      text,
+      who: currentUser,
+      ts: Date.now(),
+    };
+    if (db) await db.ref(`cats/${catId}/today_notes/${note.id}`).set(note);
+    else {
+      if (!state.cats[catId]) state.cats[catId] = {};
+      if (!state.cats[catId].today_notes) state.cats[catId].today_notes = {};
+      state.cats[catId].today_notes[note.id] = note;
+      renderCatsTop();
+    }
+    showToast(`${name}の様子を記録したよ📝`);
+  });
+}
+async function logWater(location) {
+  const log = { id: uid(), type:'water', location, ts: Date.now(), who: currentUser };
+  if (db) {
+    await db.ref(`water_log/${log.id}`).set(log);
+  } else {
+    if (!state.water_log) state.water_log = {};
+    state.water_log[log.id] = log;
+  }
+  showToast(`💧 ${location}の水を替えたよ（${currentUser}）`);
+  renderCatsTop();
+}
+
+function quickWeightModal(catId) {
+  showModal(`
+    <div class="modal-title">⚖️ 体重を記録</div>
+    <input class="form-input" id="modal-weight-val" type="number" step="0.01" placeholder="例：4.20" style="margin-bottom:8px;">
+    <input class="form-input" id="modal-weight-date" type="date" value="${todayStr()}">
+  `, async () => {
+    const val = parseFloat(document.getElementById('modal-weight-val').value);
+    const date = document.getElementById('modal-weight-date').value;
+    if (!val || !date) return;
+    await addWeightRecord(catId, val, date);
+    showToast('体重を記録したよ⚖️');
+  });
+}
+
+// ---- 個別ページ ----
+function openCatDetail(catId) {
+  currentCatId = catId;
+  currentCatDetailTab = 'profile';
+  const topEl = document.getElementById('cats-view-top');
+  const detailEl = document.getElementById('cats-view-detail');
+  topEl.style.display = 'none';
+  detailEl.style.display = 'flex';
+  renderCatDetail();
+}
+
+function renderCatDetail() {
+  const catId = currentCatId;
+  const prof = getCatProfile(catId);
+  const def = CAT_DEFAULTS[catId];
+  const name = prof.name || def.name;
+  const avatarHtml = prof.icon_url
+    ? `<img class="cat-detail-avatar" src="${prof.icon_url}">`
+    : `<span style="font-size:24px;">${def.emoji}</span>`;
+
+  const detailEl = document.getElementById('cats-view-detail');
+  const tabs = ['profile','weight','food','medicine','visit','symptom'];
+  const tabLabels = { profile:'👤プロフィール', weight:'📊体重', food:'🍚ごはん', medicine:'💊投薬', visit:'🏥受診', symptom:'📝症状' };
+
+  detailEl.innerHTML = `
+    <div class="cat-detail-header">
+      <button class="cat-detail-back" onclick="renderCatsTop();document.getElementById('cats-view-top').style.display='block';document.getElementById('cats-view-detail').style.display='none';">‹</button>
+      ${avatarHtml}
+      <div class="cat-detail-name">${esc(name)}</div>
+    </div>
+    <div class="cat-tabs">
+      ${tabs.map(t => `<div class="cat-tab${t===currentCatDetailTab?' active':''}" onclick="switchCatTab('${t}')">${tabLabels[t]}</div>`).join('')}
+    </div>
+    <div class="cat-tab-content" id="cat-tab-content"></div>
+  `;
+  renderCatTabContent();
+}
+
+function switchCatTab(tab) {
+  currentCatDetailTab = tab;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.textContent === {profile:'👤プロフィール',weight:'📊体重',food:'🍚ごはん',medicine:'💊投薬',visit:'🏥受診',symptom:'📝症状'}[tab]));
+  renderCatTabContent();
+}
+
+function renderCatTabContent() {
+  const el = document.getElementById('cat-tab-content');
+  if (!el) return;
+  if (currentCatDetailTab === 'profile') renderCatProfile(el);
+  if (currentCatDetailTab === 'weight')  renderCatWeight(el);
+  if (currentCatDetailTab === 'food')    renderCatFood(el);
+  if (currentCatDetailTab === 'medicine') renderCatMedicine(el);
+  if (currentCatDetailTab === 'visit')   renderCatVisit(el);
+  if (currentCatDetailTab === 'symptom') renderCatSymptom(el);
+}
+
+// ---- プロフィール ----
+function renderCatProfile(el) {
+  const catId = currentCatId;
+  const prof = getCatProfile(catId);
+  const def = CAT_DEFAULTS[catId];
+  const avatarHtml = prof.icon_url
+    ? `<div class="profile-avatar-img"><img src="${prof.icon_url}"></div>`
+    : `<div class="profile-avatar-img">${def.emoji}</div>`;
+
+  el.innerHTML = `<div class="profile-form">
+    <div class="profile-avatar-wrap">
+      ${avatarHtml}
+      <div>
+        <label class="btn-upload" style="font-size:13px;">
+          📷 アイコン変更
+          <input type="file" accept="image/*" style="display:none;" onchange="uploadCatIcon('${catId}',this)">
+        </label>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">名前</div>
+      <input class="form-input" id="pf-name" value="${esc(prof.name||def.name)}">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row">
+        <div class="form-label">誕生日</div>
+        <input class="form-input" id="pf-birthday" type="date" value="${prof.birthday||''}">
+      </div>
+      <div class="form-row">
+        <div class="form-label">性別</div>
+        <select class="form-input" id="pf-gender">
+          <option value="">-</option>
+          <option value="オス" ${prof.gender==='オス'?'selected':''}>オス</option>
+          <option value="メス" ${prof.gender==='メス'?'selected':''}>メス</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">品種</div>
+      <input class="form-input" id="pf-breed" value="${esc(prof.breed||'')}">
+    </div>
+    <div class="form-row-2">
+      <div class="form-row">
+        <div class="form-label">体重目標 下限 (kg)</div>
+        <input class="form-input" id="pf-weight-min" type="number" step="0.1" value="${prof.weight_min||''}">
+      </div>
+      <div class="form-row">
+        <div class="form-label">体重目標 上限 (kg)</div>
+        <input class="form-input" id="pf-weight-max" type="number" step="0.1" value="${prof.weight_max||''}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-label">かかりつけ病院</div>
+      <input class="form-input" id="pf-hospital-name" placeholder="病院名" value="${esc(prof.hospital_name||'')}">
+      <input class="form-input" id="pf-hospital-tel" placeholder="電話番号" type="tel" value="${esc(prof.hospital_tel||'')}" style="margin-top:6px;">
+      <input class="form-input" id="pf-hospital-url" placeholder="URL" type="url" value="${esc(prof.hospital_url||'')}" style="margin-top:6px;">
+      ${prof.hospital_url ? `<a class="hospital-link" href="${prof.hospital_url}" target="_blank">🔗 病院サイトを開く</a>` : ''}
+    </div>
+    <div class="form-row">
+      <div class="form-label">一言メモ</div>
+      <input class="form-input" id="pf-memo" value="${esc(prof.memo||'')}">
+    </div>
+    <button class="form-save-btn" onclick="saveCatProfile('${catId}')">保存する</button>
+  </div>`;
+}
+
+async function saveCatProfile(catId) {
+  const prof = {
+    name:          document.getElementById('pf-name').value.trim(),
+    birthday:      document.getElementById('pf-birthday').value,
+    gender:        document.getElementById('pf-gender').value,
+    breed:         document.getElementById('pf-breed').value.trim(),
+    weight_min:    parseFloat(document.getElementById('pf-weight-min').value) || null,
+    weight_max:    parseFloat(document.getElementById('pf-weight-max').value) || null,
+    hospital_name: document.getElementById('pf-hospital-name').value.trim(),
+    hospital_tel:  document.getElementById('pf-hospital-tel').value.trim(),
+    hospital_url:  document.getElementById('pf-hospital-url').value.trim(),
+    memo:          document.getElementById('pf-memo').value.trim(),
+    icon_url:      getCatProfile(catId).icon_url || null,
+  };
+  if (db) await db.ref(`cats/${catId}/profile`).set(prof);
+  else {
+    if (!state.cats[catId]) state.cats[catId] = {};
+    state.cats[catId].profile = prof;
+  }
+  showToast('プロフィールを保存したよ！');
+  renderCatDetail();
+}
+
+async function uploadCatIcon(catId, input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (!APP_CONFIG || !APP_CONFIG.cloudinary) { showToast('Cloudinaryが設定されてないよ'); return; }
+  showToast('アップロード中…');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', APP_CONFIG.cloudinary.uploadPreset);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudinary.cloudName}/image/upload`, { method:'POST', body:fd });
+  const data = await res.json();
+  if (data.secure_url) {
+    const prof = { ...getCatProfile(catId), icon_url: data.secure_url };
+    if (db) await db.ref(`cats/${catId}/profile`).update({ icon_url: data.secure_url });
+    else { if(!state.cats[catId]) state.cats[catId]={}; state.cats[catId].profile = prof; }
+    showToast('アイコンを更新したよ！');
+    renderCatDetail();
+  }
+}
+
+// ---- 体重 ----
+async function addWeightRecord(catId, value, date) {
+  const rec = { id: uid(), value, date, ts: new Date(date).getTime() || Date.now(), who: currentUser };
+  if (db) await db.ref(`cats/${catId}/weight/${rec.id}`).set(rec);
+  else {
+    if (!state.cats[catId]) state.cats[catId] = {};
+    if (!state.cats[catId].weight) state.cats[catId].weight = {};
+    state.cats[catId].weight[rec.id] = rec;
+  }
+  if (currentCatDetailTab === 'weight') renderCatTabContent();
+}
+
+function renderCatWeight(el) {
+  const catId = currentCatId;
+  const cat = getCat(catId);
+  const prof = getCatProfile(catId);
+  const weights = cat.weight ? Object.values(cat.weight).sort((a,b)=>a.ts-b.ts) : [];
+
+  el.innerHTML = `
+    <div class="weight-add-bar">
+      <input class="weight-input" id="w-val" type="number" step="0.01" placeholder="kg">
+      <input class="form-input" id="w-date" type="date" value="${todayStr()}" style="flex:1;">
+      <button class="btn-send" onclick="addWeightFromTab()">追加</button>
+    </div>
+    <div class="weight-chart-wrap">
+      <canvas id="weight-chart" height="160"></canvas>
+    </div>
+    <div class="weight-list">
+      ${weights.slice().reverse().map(w => `
+        <div class="weight-item">
+          <span class="weight-val">${w.value}kg</span>
+          <span class="weight-date">${w.date}${w.who ? ' （'+esc(w.who)+'）' : ''}</span>
+          <button class="weight-del" onclick="delWeight('${catId}','${w.id}')">✕</button>
+        </div>
+      `).join('') || '<div class="empty">まだ記録がないよ</div>'}
+    </div>
+  `;
+
+  // Chart.js描画
+  if (weights.length > 0 && typeof Chart !== 'undefined') {
+    if (weightChartInstance) weightChartInstance.destroy();
+    const ctx = document.getElementById('weight-chart').getContext('2d');
+    const wMin = prof.weight_min || null;
+    const wMax = prof.weight_max || null;
+    weightChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: weights.map(w => w.date),
+        datasets: [
+          {
+            label: '体重(kg)',
+            data: weights.map(w => w.value),
+            borderColor: CAT_DEFAULTS[catId].color,
+            backgroundColor: CAT_DEFAULTS[catId].color + '22',
+            tension: 0.3,
+            pointRadius: 4,
+            fill: true,
+          },
+          ...(wMin && wMax ? [{
+            label: '目標範囲',
+            data: weights.map(() => wMax),
+            borderColor: '#ccc',
+            borderDash: [4,4],
+            pointRadius: 0,
+            fill: '+1',
+            backgroundColor: 'rgba(200,200,200,0.15)',
+          }, {
+            label: '目標下限',
+            data: weights.map(() => wMin),
+            borderColor: '#ccc',
+            borderDash: [4,4],
+            pointRadius: 0,
+            fill: false,
+          }] : [])
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: false } }
+      }
+    });
+  }
+}
+
+async function addWeightFromTab() {
+  const val = parseFloat(document.getElementById('w-val').value);
+  const date = document.getElementById('w-date').value;
+  if (!val || !date) return;
+  await addWeightRecord(currentCatId, val, date);
+  showToast('体重を記録したよ⚖️');
+}
+
+async function delWeight(catId, id) {
+  if (db) await db.ref(`cats/${catId}/weight/${id}`).remove();
+  else { delete state.cats[catId].weight[id]; }
+  renderCatTabContent();
+}
+
+// ---- ごはん ----
+function renderCatFood(el) {
+  const catId = currentCatId;
+  const cat = getCat(catId);
+  const foods = cat.food_types ? Object.values(cat.food_types) : [];
+  el.innerHTML = `
+    <button class="form-save-btn" style="margin-bottom:14px;" onclick="showAddFoodModal('${catId}')">＋ ごはんを登録する</button>
+    ${foods.length ? foods.map(f => `
+      <div class="food-card">
+        <button class="food-del" onclick="delFood('${catId}','${f.id}')">✕</button>
+        <div class="food-name">${esc(f.name)}</div>
+        <div class="food-meta">${esc(f.maker||'')}${f.type?' · '+esc(f.type):''}${f.kcal?' · '+f.kcal+'kcal/100g':''}</div>
+      </div>
+    `).join('') : '<div class="empty">まだ登録がないよ</div>'}
+  `;
+}
+
+function showAddFoodModal(catId) {
+  showModal(`
+    <div class="modal-title">🍚 ごはんを登録</div>
+    <input class="form-input" id="food-name" placeholder="商品名" style="margin-bottom:8px;">
+    <input class="form-input" id="food-maker" placeholder="メーカー名" style="margin-bottom:8px;">
+    <select class="select-input" id="food-type">
+      <option value="">種類を選択</option>
+      <option value="ドライ">ドライ</option>
+      <option value="ウェット">ウェット</option>
+      <option value="おやつ">おやつ</option>
+      <option value="療法食">療法食</option>
+    </select>
+    <input class="form-input" id="food-kcal" type="number" placeholder="kcal/100g（任意）">
+  `, async () => {
+    const food = {
+      id: uid(),
+      name: document.getElementById('food-name').value.trim(),
+      maker: document.getElementById('food-maker').value.trim(),
+      type: document.getElementById('food-type').value,
+      kcal: document.getElementById('food-kcal').value || null,
+    };
+    if (!food.name) return;
+    if (db) await db.ref(`cats/${catId}/food_types/${food.id}`).set(food);
+    else {
+      if (!state.cats[catId]) state.cats[catId] = {};
+      if (!state.cats[catId].food_types) state.cats[catId].food_types = {};
+      state.cats[catId].food_types[food.id] = food;
+    }
+    showToast('ごはんを登録したよ🍚');
+    renderCatTabContent();
+  });
+}
+
+async function delFood(catId, id) {
+  if (db) await db.ref(`cats/${catId}/food_types/${id}`).remove();
+  else delete state.cats[catId].food_types[id];
+  renderCatTabContent();
+}
+
+// ---- 投薬 ----
+function renderCatMedicine(el) {
+  const catId = currentCatId;
+  const cat = getCat(catId);
+  const meds = cat.medicine ? Object.values(cat.medicine) : [];
+  el.innerHTML = `
+    <button class="form-save-btn" style="margin-bottom:14px;" onclick="showAddMedModal('${catId}')">＋ 薬を登録する</button>
+    ${meds.length ? meds.map(m => `
+      <div class="med-card">
+        <button class="med-del" onclick="delMed('${catId}','${m.id}')">✕</button>
+        <div class="med-name">💊 ${esc(m.name)}</div>
+        <div class="med-meta">${m.dose?' 量: '+esc(m.dose):''}${m.freq?' · '+esc(m.freq):''}${m.next_date?' · 次回: '+m.next_date:''}</div>
+        <button class="med-log-btn" onclick="logMed('${catId}','${m.id}','${esc(m.name)}')">今日投薬した</button>
+      </div>
+    `).join('') : '<div class="empty">まだ登録がないよ</div>'}
+  `;
+}
+
+function showAddMedModal(catId) {
+  showModal(`
+    <div class="modal-title">💊 薬を登録</div>
+    <input class="form-input" id="med-name" placeholder="薬の名前" style="margin-bottom:8px;">
+    <input class="form-input" id="med-dose" placeholder="量（例：0.5ml）" style="margin-bottom:8px;">
+    <input class="form-input" id="med-freq" placeholder="頻度（例：毎日・週1回）" style="margin-bottom:8px;">
+    <div class="form-label" style="margin-bottom:4px;">次回投薬日</div>
+    <input class="form-input" id="med-next" type="date">
+  `, async () => {
+    const med = {
+      id: uid(),
+      name: document.getElementById('med-name').value.trim(),
+      dose: document.getElementById('med-dose').value.trim(),
+      freq: document.getElementById('med-freq').value.trim(),
+      next_date: document.getElementById('med-next').value,
+    };
+    if (!med.name) return;
+    if (db) await db.ref(`cats/${catId}/medicine/${med.id}`).set(med);
+    else {
+      if (!state.cats[catId]) state.cats[catId] = {};
+      if (!state.cats[catId].medicine) state.cats[catId].medicine = {};
+      state.cats[catId].medicine[med.id] = med;
+    }
+    // カレンダーにも追加
+    if (med.next_date) {
+      const ev = { id: uid(), date: med.next_date, title: `💊 ${(getCatProfile(catId).name||CAT_DEFAULTS[catId].name)} ${med.name}`, who: currentUser, catId };
+      if (db) await db.ref(`events/${ev.id}`).set(ev);
+    }
+    showToast('薬を登録したよ💊');
+    renderCatTabContent();
+  });
+}
+
+async function logMed(catId, medId, medName) {
+  const log = { id: uid(), med_id: medId, med_name: medName, date: todayStr(), ts: Date.now(), who: currentUser };
+  if (db) await db.ref(`cats/${catId}/med_log/${log.id}`).set(log);
+  showToast(`${medName}を記録したよ💊`);
+}
+
+async function delMed(catId, id) {
+  if (db) await db.ref(`cats/${catId}/medicine/${id}`).remove();
+  else delete state.cats[catId].medicine[id];
+  renderCatTabContent();
+}
+
+// ---- 受診 ----
+function renderCatVisit(el) {
+  const catId = currentCatId;
+  const cat = getCat(catId);
+  const visits = cat.visits ? Object.values(cat.visits).sort((a,b)=>b.ts-a.ts) : [];
+  el.innerHTML = `
+    <button class="form-save-btn" style="margin-bottom:14px;" onclick="showAddVisitModal('${catId}')">＋ 受診を記録する</button>
+    ${visits.length ? visits.map(v => `
+      <div class="visit-card">
+        <button class="visit-del" onclick="delVisit('${catId}','${v.id}')">✕</button>
+        <div class="visit-date">${v.date}</div>
+        <div class="visit-hospital">🏥 ${esc(v.hospital||'')}${v.who ? ' <span style="font-size:11px;color:var(--text-muted);">（'+esc(v.who)+'）</span>' : ''}</div>
+        ${v.diagnosis ? `<div class="visit-diag">${esc(v.diagnosis)}</div>` : ''}
+        ${v.cost ? `<div class="visit-cost">¥${Number(v.cost).toLocaleString()}</div>` : ''}
+        ${v.photos && v.photos.length ? `<div class="visit-photos">${v.photos.map(p=>`<img class="visit-photo" src="${p}" onclick="openPhotoOverlay2('${p}')">`).join('')}</div>` : ''}
+      </div>
+    `).join('') : '<div class="empty">まだ記録がないよ</div>'}
+  `;
+}
+
+function showAddVisitModal(catId) {
+  showModal(`
+    <div class="modal-title">🏥 受診を記録</div>
+    <input class="form-input" id="visit-date" type="date" value="${todayStr()}" style="margin-bottom:8px;">
+    <input class="form-input" id="visit-hospital" placeholder="病院名" style="margin-bottom:8px;">
+    <textarea class="textarea-input" id="visit-diag" placeholder="診断・メモ"></textarea>
+    <input class="form-input" id="visit-cost" type="number" placeholder="費用（円）" style="margin-top:8px;margin-bottom:8px;">
+    <label class="btn-upload" style="display:inline-flex;margin-bottom:8px;">
+      📷 写真を追加
+      <input type="file" accept="image/*" multiple style="display:none;" id="visit-photo-input">
+    </label>
+    <div id="visit-photo-preview" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+  `, async () => {
+    const photos = [];
+    const files = document.getElementById('visit-photo-input').files;
+    if (files.length && APP_CONFIG && APP_CONFIG.cloudinary) {
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', APP_CONFIG.cloudinary.uploadPreset);
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudinary.cloudName}/image/upload`, { method:'POST', body:fd });
+        const data = await res.json();
+        if (data.secure_url) photos.push(data.secure_url);
+      }
+    }
+    const visit = {
+      id: uid(),
+      date: document.getElementById('visit-date').value,
+      hospital: document.getElementById('visit-hospital').value.trim(),
+      diagnosis: document.getElementById('visit-diag').value.trim(),
+      cost: document.getElementById('visit-cost').value || null,
+      photos,
+      ts: Date.now(),
+      who: currentUser,
+    };
+    if (db) await db.ref(`cats/${catId}/visits/${visit.id}`).set(visit);
+    else {
+      if (!state.cats[catId]) state.cats[catId] = {};
+      if (!state.cats[catId].visits) state.cats[catId].visits = {};
+      state.cats[catId].visits[visit.id] = visit;
+    }
+    showToast('受診記録を追加したよ🏥');
+    renderCatTabContent();
+  });
+}
+
+async function delVisit(catId, id) {
+  if (db) await db.ref(`cats/${catId}/visits/${id}`).remove();
+  else delete state.cats[catId].visits[id];
+  renderCatTabContent();
+}
+
+function openPhotoOverlay2(url) {
+  const overlay = document.createElement('div');
+  overlay.className = 'photo-overlay';
+  overlay.innerHTML = `<button class="photo-overlay-close" onclick="this.parentElement.remove()">✕</button><img src="${url}">`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+// ---- 症状 ----
+function renderCatSymptom(el) {
+  const catId = currentCatId;
+  const cat = getCat(catId);
+  const symptoms = cat.symptoms ? Object.values(cat.symptoms).sort((a,b)=>b.ts-a.ts) : [];
+  el.innerHTML = `
+    <button class="form-save-btn" style="margin-bottom:14px;" onclick="showAddSymptomModal('${catId}')">＋ 症状を記録する</button>
+    ${symptoms.length ? symptoms.map(s => `
+      <div class="symptom-card">
+        <button class="symptom-del" onclick="delSymptom('${catId}','${s.id}')">✕</button>
+        <span class="symptom-level ${s.level}">${{low:'軽微',mid:'注意',high:'要受診'}[s.level]||s.level}</span>
+        <span class="symptom-date" style="margin-left:8px;">${s.date}</span>
+        <div class="symptom-text">${esc(s.text)}</div>${s.who ? '<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">（'+esc(s.who)+'）</div>' : ''}
+      </div>
+    `).join('') : '<div class="empty">まだ記録がないよ</div>'}
+  `;
+}
+
+function showAddSymptomModal(catId) {
+  showModal(`
+    <div class="modal-title">📝 症状を記録</div>
+    <input class="form-input" id="sym-date" type="date" value="${todayStr()}" style="margin-bottom:8px;">
+    <select class="select-input" id="sym-level">
+      <option value="low">軽微</option>
+      <option value="mid">注意</option>
+      <option value="high">要受診</option>
+    </select>
+    <textarea class="textarea-input" id="sym-text" placeholder="気になる症状を書いてね"></textarea>
+  `, async () => {
+    const sym = {
+      id: uid(),
+      date: document.getElementById('sym-date').value,
+      level: document.getElementById('sym-level').value,
+      text: document.getElementById('sym-text').value.trim(),
+      ts: Date.now(),
+      who: currentUser,
+    };
+    if (!sym.text) return;
+    if (db) await db.ref(`cats/${catId}/symptoms/${sym.id}`).set(sym);
+    else {
+      if (!state.cats[catId]) state.cats[catId] = {};
+      if (!state.cats[catId].symptoms) state.cats[catId].symptoms = {};
+      state.cats[catId].symptoms[sym.id] = sym;
+    }
+    showToast('症状を記録したよ📝');
+    renderCatTabContent();
+  });
+}
+
+async function delSymptom(catId, id) {
+  if (db) await db.ref(`cats/${catId}/symptoms/${id}`).remove();
+  else delete state.cats[catId].symptoms[id];
+  renderCatTabContent();
+}
+
+// ---- 共通モーダル ----
+function showModal(bodyHtml, onOk) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-box">
+      ${bodyHtml}
+      <div class="modal-btns">
+        <button class="modal-cancel" onclick="this.closest('.modal-overlay').remove()">キャンセル</button>
+        <button class="modal-ok" id="modal-ok-btn">OK</button>
+      </div>
+    </div>
+  `;
+  overlay.querySelector('#modal-ok-btn').addEventListener('click', async () => {
+    await onOk();
+    overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
 // ============================================================
 //  FCM / PWA / PUSH通知
 // ============================================================
@@ -1039,6 +1980,7 @@ async function initFCM() {
 // ※ FCMのサーバー送信はFirebase Functions or Cloud Runが必要なため
 // ここではフォアグラウンド通知（アプリを開いてる相手への通知）のみ対応
 // バックグラウンド通知はfirebase-messaging-sw.jsで処理
+
 // ユーザー切り替え時にFCMトークンを更新（setUser本体で処理）
 
 // PWAインストール案内（iOS）
