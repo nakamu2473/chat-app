@@ -229,7 +229,7 @@
   .water-section-title { font-size:12px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
   .water-btns { display:flex; gap:6px; }
   /* ===== CATS ===== */
-  .cats-top { display:flex; flex-direction:column; gap:12px; padding:16px; overflow-y:auto; height:100%; }
+  .cats-top { display:flex; flex-direction:column; gap:12px; padding:16px; }
   .cat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
   .cat-card-header { display:flex; align-items:center; gap:12px; }
   .cat-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; background:var(--bg); border:2px solid var(--border); flex-shrink:0; font-size:28px; display:flex; align-items:center; justify-content:center; }
@@ -449,7 +449,7 @@
 
   <!-- CATS -->
   <div class="page" id="page-cats">
-    <div id="cats-view-top"></div>
+    <div id="cats-view-top" style="flex:1;overflow-y:auto;min-height:0;"></div>
     <div id="cats-view-detail" style="display:none;height:100%;flex-direction:column;overflow:hidden;"></div>
   </div>
 </main>
