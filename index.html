@@ -358,7 +358,7 @@
 <main>
   <!-- CHAT -->
   <div class="page active" id="page-chat">
-    <div class="section-inner" id="chat-scroll">
+    <div class="section-inner" id="chat-scroll" ontouchstart="document.activeElement.blur()">
       <div class="chat-messages" id="chat-messages"></div>
     </div>
     <div class="input-bar">
@@ -1918,6 +1918,7 @@ function showModal(bodyHtml, onOk) {
     await onOk();
     overlay.remove();
   });
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.body.appendChild(overlay);
 }
 // ============================================================
