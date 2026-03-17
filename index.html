@@ -227,7 +227,26 @@
 
   .water-section { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:8px 12px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
   .water-section-title { font-size:12px; font-weight:700; color:var(--text-muted); white-space:nowrap; }
-  .water-btns { display:flex; gap:6px; }
+  .water-btns { display:flex; gap:6px; flex:1; }
+  .water-history-btn { background:none; border:1px solid var(--border); border-radius:8px; padding:4px 10px; font-size:11px; color:var(--text-muted); cursor:pointer; white-space:nowrap; }
+  .water-history-btn:hover { background:var(--bg); }
+  .water-history-page { display:flex; flex-direction:column; height:100%; overflow:hidden; }
+  .water-history-header { display:flex; align-items:center; gap:10px; padding:12px 16px; border-bottom:1px solid var(--border); flex-shrink:0; }
+  .water-history-back { background:none; border:none; font-size:22px; cursor:pointer; color:var(--text); line-height:1; padding:0 4px; }
+  .water-history-title { font-size:16px; font-weight:700; }
+  .water-history-filter { display:flex; gap:6px; padding:10px 16px; flex-shrink:0; }
+  .water-filter-btn { padding:5px 14px; border-radius:20px; border:1px solid var(--border); background:var(--surface); font-size:12px; cursor:pointer; color:var(--text-muted); }
+  .water-filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:700; }
+  .water-history-list { flex:1; overflow-y:auto; padding:0 16px 16px; }
+  .water-log-day { margin-top:14px; }
+  .water-log-day-label { font-size:11px; font-weight:700; color:var(--text-muted); margin-bottom:6px; padding-left:2px; }
+  .water-log-item { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 12px; margin-bottom:6px; }
+  .water-log-icon { font-size:20px; flex-shrink:0; }
+  .water-log-info { flex:1; }
+  .water-log-loc { font-size:14px; font-weight:700; }
+  .water-log-meta { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .water-log-del { background:none; border:none; color:var(--text-muted); font-size:16px; cursor:pointer; padding:4px; opacity:0.6; }
+  .water-log-del:hover { opacity:1; color:#e53; }
   /* ===== CATS ===== */
   .cats-top { display:flex; flex-direction:column; gap:12px; padding:16px; }
   .cat-card { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; }
@@ -454,6 +473,7 @@
   <div class="page" id="page-cats">
     <div id="cats-view-top" style="flex:1;overflow-y:auto;min-height:0;"></div>
     <div id="cats-view-detail" style="display:none;height:100%;flex-direction:column;overflow:hidden;"></div>
+    <div id="cats-view-water-history" style="display:none;height:100%;flex-direction:column;overflow:hidden;"></div>
   </div>
 </main>
 
@@ -580,7 +600,14 @@ function setupRealtimeListeners() {
   db.ref('water_log').on('value', snap => {
     const val = snap.val();
     state.water_log = val || {};
-    if (currentTab === 'cats') renderCatsTop();
+    if (currentTab === 'cats') {
+      const histEl = document.getElementById('cats-view-water-history');
+      if (histEl && histEl.style.display !== 'none') {
+        renderWaterHistory();
+      } else {
+        renderCatsTop();
+      }
+    }
   });
 }
 
@@ -1241,6 +1268,7 @@ function renderCatsTop() {
         <span style="font-size:10px;color:var(--text-muted);font-weight:400;">${lastWater2F ? fmtTimeAgo(lastWater2F.ts)+'（'+lastWater2F.who+'）' : '未記録'}</span>
       </button>
     </div>
+    <button class="water-history-btn" onclick="openWaterHistory()">履歴</button>
   </div>`;
 
   // 猫カード
@@ -1372,6 +1400,98 @@ async function logWater(location) {
   }
   showToast(`💧 ${location}の水を替えたよ（${currentUser}）`);
   renderCatsTop();
+}
+
+let waterHistoryFilter = 'all';
+
+function openWaterHistory() {
+  document.getElementById('cats-view-top').style.display = 'none';
+  document.getElementById('cats-view-detail').style.display = 'none';
+  const el = document.getElementById('cats-view-water-history');
+  el.style.display = 'flex';
+  waterHistoryFilter = 'all';
+  renderWaterHistory();
+}
+
+function closeWaterHistory() {
+  document.getElementById('cats-view-water-history').style.display = 'none';
+  renderCatsTop();
+  document.getElementById('cats-view-top').style.display = 'block';
+}
+
+function renderWaterHistory() {
+  const el = document.getElementById('cats-view-water-history');
+  if (!el) return;
+
+  const allLogs = state.water_log ? Object.values(state.water_log) : [];
+  const filtered = waterHistoryFilter === 'all'
+    ? allLogs
+    : allLogs.filter(l => l.location === waterHistoryFilter);
+  const sorted = filtered.sort((a, b) => b.ts - a.ts);
+
+  // グループ化（日付ごと）
+  const byDay = {};
+  sorted.forEach(l => {
+    const d = new Date(l.ts);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+    if (!byDay[key]) byDay[key] = [];
+    byDay[key].push(l);
+  });
+
+  const dayKeys = Object.keys(byDay).sort((a,b) => b.localeCompare(a));
+
+  const listHtml = dayKeys.length === 0
+    ? '<div class="empty" style="margin-top:40px;">まだ記録がないよ</div>'
+    : dayKeys.map(day => {
+        const [y, m, d] = day.split('-');
+        const label = `${y}年${Number(m)}月${Number(d)}日`;
+        const items = byDay[day].map(l => {
+          const t = new Date(l.ts);
+          const timeStr = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+          const icon = l.location === '1F' ? '🏠' : '🛏';
+          return `<div class="water-log-item">
+            <div class="water-log-icon">${icon}</div>
+            <div class="water-log-info">
+              <div class="water-log-loc">${esc(l.location)}</div>
+              <div class="water-log-meta">${timeStr}　${esc(l.who||'')}</div>
+            </div>
+            <button class="water-log-del" onclick="delWaterLog('${esc(l.id)}')">✕</button>
+          </div>`;
+        }).join('');
+        return `<div class="water-log-day">
+          <div class="water-log-day-label">${label}</div>
+          ${items}
+        </div>`;
+      }).join('');
+
+  const filters = ['all','1F','2F'];
+  const filterLabels = { all:'すべて', '1F':'🏠 1F', '2F':'🛏 2F' };
+  const filterHtml = filters.map(f =>
+    `<button class="water-filter-btn${waterHistoryFilter===f?' active':''}" onclick="setWaterFilter('${f}')">${filterLabels[f]}</button>`
+  ).join('');
+
+  el.innerHTML = `
+    <div class="water-history-header">
+      <button class="water-history-back" onclick="closeWaterHistory()">‹</button>
+      <div class="water-history-title">💧 水かえ履歴</div>
+    </div>
+    <div class="water-history-filter">${filterHtml}</div>
+    <div class="water-history-list">${listHtml}</div>
+  `;
+}
+
+function setWaterFilter(f) {
+  waterHistoryFilter = f;
+  renderWaterHistory();
+}
+
+async function delWaterLog(id) {
+  if (db) {
+    await db.ref(`water_log/${id}`).remove();
+  } else {
+    delete state.water_log[id];
+    renderWaterHistory();
+  }
 }
 
 function quickWeightModal(catId) {
