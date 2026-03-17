@@ -574,7 +574,14 @@ function setupRealtimeListeners() {
   db.ref('cats').on('value', snap => {
     const val = snap.val();
     state.cats = val || {};
-    if (currentTab === 'cats') renderCatsTop();
+    if (currentTab === 'cats') {
+      const detailEl = document.getElementById('cats-view-detail');
+      if (detailEl && detailEl.style.display !== 'none') {
+        renderCatTabContent();
+      } else {
+        renderCatsTop();
+      }
+    }
   });
 
   db.ref('water_log').on('value', snap => {
