@@ -285,6 +285,9 @@
   .food-name { font-size:14px; font-weight:600; }
   .food-meta { font-size:12px; color:var(--text-muted); margin-top:2px; }
   .food-del { background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:14px; float:right; }
+  .food-log-btn { font-size:12px; background:var(--accent-light); color:var(--accent); border:1px solid var(--accent); border-radius:6px; padding:3px 10px; cursor:pointer; font-family:inherit; margin-top:6px; }
+  .food-log-entry { display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); padding:5px 0; border-bottom:1px solid var(--border); }
+  .food-log-entry:last-child { border-bottom:none; }
 
   /* medicine */
   .med-card { background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--accent2); border-radius:10px; padding:12px 14px; margin-bottom:8px; }
@@ -1652,6 +1655,8 @@ function renderCatFood(el) {
   const catId = currentCatId;
   const cat = getCat(catId);
   const foods = cat.food_types ? Object.values(cat.food_types) : [];
+  const logs = cat.food_log ? Object.values(cat.food_log).sort((a,b) => b.ts - a.ts) : [];
+  const recentLogs = logs.slice(0, 20);
   el.innerHTML = `
     <button class="form-save-btn" style="margin-bottom:14px;" onclick="showAddFoodModal('${catId}')">＋ ごはんを登録する</button>
     ${foods.length ? foods.map(f => `
@@ -1659,8 +1664,19 @@ function renderCatFood(el) {
         <button class="food-del" onclick="delFood('${catId}','${f.id}')">✕</button>
         <div class="food-name">${esc(f.name)}</div>
         <div class="food-meta">${esc(f.maker||'')}${f.type?' · '+esc(f.type):''}${f.kcal?' · '+f.kcal+'kcal/100g':''}</div>
+        <button class="food-log-btn" onclick="logFood('${catId}','${f.id}','${esc(f.name)}')">今日あげた</button>
       </div>
     `).join('') : '<div class="empty">まだ登録がないよ</div>'}
+    ${recentLogs.length ? `
+      <div style="margin-top:18px;">
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:8px;">📋 ごはん記録</div>
+        ${recentLogs.map(l => {
+          const d = new Date(l.ts);
+          const dateStr = (d.getMonth()+1)+'/'+ d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+          return `<div class="food-log-entry"><span>🍚 ${esc(l.food_name)}</span><span>${dateStr}（${esc(l.who)}）</span></div>`;
+        }).join('')}
+      </div>
+    ` : ''}
   `;
 }
 
@@ -1758,6 +1774,18 @@ async function logMed(catId, medId, medName) {
   const log = { id: uid(), med_id: medId, med_name: medName, date: todayStr(), ts: Date.now(), who: currentUser };
   if (db) await db.ref(`cats/${catId}/med_log/${log.id}`).set(log);
   showToast(`${medName}を記録したよ💊`);
+}
+
+async function logFood(catId, foodId, foodName) {
+  const log = { id: uid(), food_id: foodId, food_name: foodName, date: todayStr(), ts: Date.now(), who: currentUser };
+  if (db) await db.ref(`cats/${catId}/food_log/${log.id}`).set(log);
+  else {
+    if (!state.cats[catId]) state.cats[catId] = {};
+    if (!state.cats[catId].food_log) state.cats[catId].food_log = {};
+    state.cats[catId].food_log[log.id] = log;
+    renderCatTabContent();
+  }
+  showToast(`${foodName}をあげたよ🍚`);
 }
 
 async function delMed(catId, id) {
