@@ -461,7 +461,7 @@
     </div>
     <div class="input-bar">
       <div class="input-wrap">
-        <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter')sendChat()">
+        <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendChat()">
         <button class="btn-send" onclick="sendChat()">送信</button>
       </div>
     </div>
@@ -475,7 +475,7 @@
     </div>
     <div class="input-bar">
       <div class="input-wrap">
-        <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter')addShopItem()">
+        <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addShopItem()">
         <button class="btn-send" onclick="addShopItem()">追加</button>
       </div>
     </div>
@@ -491,7 +491,7 @@
       </div>
       <div style="display:flex;gap:8px;width:100%;">
         <div class="input-wrap">
-          <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter')addMemo()">
+          <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addMemo()">
           <button class="btn-send" onclick="addMemo()">追加</button>
         </div>
       </div>
@@ -515,7 +515,7 @@
     <div class="input-bar">
       <div class="input-wrap" style="flex:1;">
         <input type="date" id="cal-date" style="flex:0 0 110px;font-family:inherit;font-size:13px;border:none;background:transparent;outline:none;">
-        <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter')addEvent()" style="flex:1;">
+        <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addEvent()" style="flex:1;">
         <button class="btn-send" onclick="addEvent()">追加</button>
       </div>
     </div>
