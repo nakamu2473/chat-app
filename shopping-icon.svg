@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <style>
+    .paper  { fill: #F5F2EC; stroke: #A89880; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .edge   { fill: none; stroke: #A89880; stroke-width: 1.4; stroke-linecap: round; }
+    .line   { stroke: #8C8070; stroke-width: 1.6; stroke-linecap: round; }
+    .done   { stroke: #C4B8A8; stroke-width: 1.4; stroke-linecap: round; }
+    .check  { stroke: #7A8C7E; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+    .box    { fill: none; stroke: #A89880; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .basket { fill: none; stroke: #8C7E7A; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+    .mesh   { fill: none; stroke: #8C7E7A; stroke-width: 1.1; stroke-linecap: round; opacity: 0.75; }
+  </style>
+
+  <!-- Paper body -->
+  <path class="paper"
+    d="M34,18 L114,15 Q123,15 124,24 L127,130 Q128,139 119,140 L41,143 Q32,143 31,134 L28,27 Q27,18 34,18 Z"
+    transform="rotate(-1.5, 78, 80)"
+  />
+
+  <!-- Top torn edge -->
+  <path class="edge"
+    d="M34,18 Q52,23 78,17 Q104,11 114,15"
+    transform="rotate(-1.5, 78, 80)"
+  />
+
+  <!-- Row 1: checked + strikethrough -->
+  <rect class="box" x="40" y="36" width="15" height="15" rx="2.5" transform="rotate(-1, 47, 43)"/>
+  <path class="check" d="M43,44 L47,49 L57,38" />
+  <line class="done" x1="64" y1="44" x2="108" y2="43" />
+
+  <!-- Row 2: checked -->
+  <rect class="box" x="40" y="59" width="15" height="15" rx="2.5" transform="rotate(0.8, 47, 66)"/>
+  <path class="check" d="M43,67 L47,72 L57,61" />
+  <line class="line" x1="64" y1="67" x2="104" y2="66" />
+
+  <!-- Row 3: unchecked -->
+  <rect class="box" x="40" y="82" width="15" height="15" rx="2.5" transform="rotate(-0.5, 47, 89)"/>
+  <line class="line" x1="64" y1="90" x2="106" y2="89" />
+
+  <!-- Row 4: unchecked -->
+  <rect class="box" x="40" y="105" width="15" height="14" rx="2.5"/>
+  <line class="line" x1="64" y1="112" x2="98" y2="111" />
+
+  <!-- Row 5: unchecked short -->
+  <rect class="box" x="40" y="127" width="15" height="12" rx="2.5" transform="rotate(0.5, 47, 133)"/>
+  <line class="line" x1="64" y1="133" x2="90" y2="132" />
+
+  <!-- === WOVEN BASKET top-right === -->
+  <!-- handle arc -->
+  <path class="basket" d="M100,24 Q112,12 124,24" stroke-width="1.8"/>
+
+  <!-- basket body outline -->
+  <path class="basket" d="M96,28 L99,48 L126,48 L129,28 Z" stroke-width="1.8"/>
+
+  <!-- horizontal weave lines -->
+  <line class="mesh" x1="97" y1="33" x2="128" y2="33"/>
+  <line class="mesh" x1="97.5" y1="38" x2="128" y2="38"/>
+  <line class="mesh" x1="98" y1="43" x2="127.5" y2="43"/>
+
+  <!-- vertical weave lines -->
+  <line class="mesh" x1="102" y1="28" x2="100.5" y2="48"/>
+  <line class="mesh" x1="107" y1="28" x2="106" y2="48"/>
+  <line class="mesh" x1="112" y1="28" x2="112" y2="48"/>
+  <line class="mesh" x1="117" y1="28" x2="117.5" y2="48"/>
+  <line class="mesh" x1="122" y1="28" x2="123" y2="48"/>
+
+  <!-- basket rim -->
+  <line class="basket" x1="96" y1="28" x2="129" y2="28" stroke-width="1.8"/>
+</svg>

@@ -87,7 +87,9 @@
   /* TABS */
   nav { background: var(--surface); border-bottom: 1px solid var(--border); display: flex; flex-shrink: 0; }
   .tab { flex: 1; padding: 12px 4px; text-align: center; font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 0.18s; display: flex; flex-direction: column; align-items: center; gap: 3px; letter-spacing: 0.03em; }
-  .tab .icon { font-size: 18px; }
+  .tab .icon { display: flex; align-items: center; justify-content: center; }
+  .tab .icon img { width: 24px; height: 24px; opacity: 0.55; transition: opacity 0.18s; }
+  .tab.active .icon img { opacity: 1; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
   main { flex: 1; overflow: hidden; min-height: 0; }
@@ -382,12 +384,12 @@
 </header>
 
 <nav>
-  <div class="tab active" onclick="showTab('chat')"><span class="icon">💬</span>チャット</div>
-  <div class="tab" onclick="showTab('shop')"><span class="icon">🛒</span>買い物</div>
-  <div class="tab" onclick="showTab('memo')"><span class="icon">📝</span>メモ/TODO</div>
-  <div class="tab" onclick="showTab('cal')"><span class="icon">📅</span>カレンダー</div>
-  <div class="tab" onclick="showTab('album')"><span class="icon">📸</span>アルバム</div>
-  <div class="tab" onclick="showTab('cats')"><span class="icon">🐱</span>ねこ</div>
+  <div class="tab active" onclick="showTab('chat')"><span class="icon"><img src="chat-icon.svg" alt="チャット"></span>チャット</div>
+  <div class="tab" onclick="showTab('shop')"><span class="icon"><img src="shopping-icon.svg" alt="買い物"></span>買い物</div>
+  <div class="tab" onclick="showTab('memo')"><span class="icon"><img src="memo-todo-icon.svg" alt="メモ/TODO"></span>メモ/TODO</div>
+  <div class="tab" onclick="showTab('cal')"><span class="icon"><img src="calendar-icon.svg" alt="カレンダー"></span>カレンダー</div>
+  <div class="tab" onclick="showTab('album')"><span class="icon"><img src="album-icon.svg" alt="アルバム"></span>アルバム</div>
+  <div class="tab" onclick="showTab('cats')"><span class="icon"><img src="cats-icon.svg" alt="ねこ"></span>ねこ</div>
 </nav>
 
 <main>

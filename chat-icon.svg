@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <style>
+    .bubble { stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+
+  <!-- Left bubble: dusty sage -->
+  <path class="bubble"
+    stroke="#7A8C7E" stroke-width="1.8" fill="#EAF0EA"
+    d="M14,32 Q13,19 24,18 L82,16 Q93,15 94,27 L96,52 Q97,64 86,65 L42,67 L32,80 L35,66 L25,66 Q13,66 13,54 Z"
+    transform="rotate(-1.5, 54, 48)"
+  />
+
+  <!-- Right bubble: dusty rose -->
+  <path class="bubble"
+    stroke="#8C7E7A" stroke-width="1.8" fill="#F0ECEA"
+    d="M57,90 Q56,78 67,77 L122,75 Q133,74 134,86 L136,111 Q137,123 126,124 L118,124 L121,138 L109,124 L68,125 Q57,125 57,113 Z"
+    transform="rotate(1.2, 96, 100)"
+  />
+
+  <!-- Left dots -->
+  <circle cx="40" cy="43" r="3.2" fill="#7A8C7E" opacity="0.7"/>
+  <circle cx="54" cy="42" r="3.2" fill="#7A8C7E" opacity="0.7"/>
+  <circle cx="68" cy="41" r="3.2" fill="#7A8C7E" opacity="0.7"/>
+
+  <!-- Right dots -->
+  <circle cx="82" cy="100" r="3.2" fill="#8C7E7A" opacity="0.7"/>
+  <circle cx="96" cy="99" r="3.2" fill="#8C7E7A" opacity="0.7"/>
+  <circle cx="110" cy="98" r="3.2" fill="#8C7E7A" opacity="0.7"/>
+
+
+</svg>
