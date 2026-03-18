@@ -520,21 +520,21 @@ function showToast(msg) {
 //  ログインボーナス
 // ============================================================
 const BONUS_STREAK_MESSAGES = {
-  1:   'また来てくれた！嬉しいな🌸',
-  3:   '3日連続！いい調子だよ✨',
-  7:   '1週間連続！すごい！🎉',
-  14:  '2週間連続！ありがとう💕',
-  30:  '1ヶ月連続！大好きだよ🥰',
-  100: '100日連続！！伝説だよ🏆',
+  1:   '🍯カル「また来た！なでて！！ちゅぱちゅぱ」',
+  3:   '🐱猫氏「…3日連続ね。まぁ、認めてあげてもよくてよ」',
+  7:   '🌀メイ「うにゃ！！1週間！！すごい！うにゃうにゃ！！」',
+  14:  '🐱猫氏「2週間連続……まぁ、悪くないわね。特別に認めてあげるわ」',
+  30:  '🍯カル「1ヶ月！！ちゅぱちゅぱ！！僕のこと好きでしょ！！ちゅぱちゅぱ！！」',
+  100: '🐱猫氏「…100日。あなた、なかなかやるわね。……ありがとう」',
 };
 
 function getBonusStreakEmoji(streak) {
-  if (streak >= 100) return '🏆';
-  if (streak >= 30)  return '🥰';
-  if (streak >= 14)  return '💕';
-  if (streak >= 7)   return '🎉';
-  if (streak >= 3)   return '✨';
-  return '🌟';
+  if (streak >= 100) return '🐱';
+  if (streak >= 30)  return '🍯';
+  if (streak >= 14)  return '🐱';
+  if (streak >= 7)   return '🌀';
+  if (streak >= 3)   return '🐱';
+  return '🍯';
 }
 
 function getBonusStreakMessage(streak) {
@@ -542,7 +542,7 @@ function getBonusStreakMessage(streak) {
   for (const k of keys) {
     if (streak >= k) return BONUS_STREAK_MESSAGES[k];
   }
-  return 'また来てくれた！嬉しいな🌸';
+  return '🍯カル「また来た！なでて！！ちゅぱちゅぱ」';
 }
 
 async function checkLoginBonus(user) {
