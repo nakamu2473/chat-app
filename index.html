@@ -497,7 +497,7 @@
     </div>
     <div class="input-bar">
       <div class="input-wrap">
-        <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter')addShopItem()">
+        <input type="text" id="shop-input" placeholder="商品名を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addShopItem()">
         <button class="btn-send" onclick="addShopItem()">追加</button>
       </div>
     </div>
@@ -513,7 +513,7 @@
       </div>
       <div style="display:flex;gap:8px;width:100%;">
         <div class="input-wrap">
-          <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter')addMemo()">
+          <input type="text" id="memo-input" placeholder="内容を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addMemo()">
           <button class="btn-send" onclick="addMemo()">追加</button>
         </div>
       </div>
@@ -537,7 +537,7 @@
     <div class="input-bar">
       <div class="input-wrap" style="flex:1;">
         <input type="date" id="cal-date" style="flex:0 0 110px;font-family:inherit;font-size:13px;border:none;background:transparent;outline:none;">
-        <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter')addEvent()" style="flex:1;">
+        <input type="text" id="cal-input" placeholder="予定を入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)addEvent()" style="flex:1;">
         <button class="btn-send" onclick="addEvent()">追加</button>
       </div>
     </div>
@@ -2311,6 +2311,12 @@ function initAuth() {
     return;
   }
   auth = firebase.auth();
+
+  // リダイレクトログイン後の結果を処理
+  auth.getRedirectResult().catch(() => {
+    showLoginScreen('ログインに失敗しました');
+  });
+
   auth.onAuthStateChanged((user) => {
     if (user) {
       const mappedUser = EMAIL_TO_USER[user.email];
@@ -2334,14 +2340,8 @@ async function signInWithGoogle() {
   const btn = document.querySelector('.google-btn');
   btn.disabled = true;
   btn.textContent = 'ログイン中…';
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    await auth.signInWithPopup(provider);
-  } catch(e) {
-    document.getElementById('login-error').textContent = 'ログインに失敗しました';
-    btn.disabled = false;
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Googleでログイン`;
-  }
+  const provider = new firebase.auth.GoogleAuthProvider();
+  await auth.signInWithRedirect(provider);
 }
 
 function showLoginScreen(msg) {
