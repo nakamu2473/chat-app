@@ -3,6 +3,10 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
+// 新バージョンのSWをすぐに有効化する（古いキャッシュを残さない）
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+
 let messaging = null;
 
 // IndexedDBからFirebase設定を読み込む（アプリが閉じている場合のフォールバック）
