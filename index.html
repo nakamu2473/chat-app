@@ -2096,6 +2096,18 @@ function showModal(bodyHtml, onOk) {
 let messaging = null;
 let fcmToken = null;
 
+// Firebase設定をIndexedDBに保存（SWがアプリ閉じてる状態でも使えるように）
+function saveFirebaseConfigToDB(config) {
+  try {
+    const req = indexedDB.open('futari-sw-config', 1);
+    req.onupgradeneeded = (e) => e.target.result.createObjectStore('config');
+    req.onsuccess = (e) => {
+      const idb = e.target.result;
+      idb.transaction('config', 'readwrite').objectStore('config').put(config, 'firebase');
+    };
+  } catch(e) {}
+}
+
 async function initFCM() {
   if (!useFirebase || !db) return;
   if (!APP_CONFIG.fcm || !APP_CONFIG.fcm.vapidKey || APP_CONFIG.fcm.vapidKey === 'YOUR_VAPID_KEY') return;
@@ -2104,16 +2116,22 @@ async function initFCM() {
     // Service Worker 登録
     const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
-    // Service WorkerにFirebase設定を渡す
-    if (swReg.active) {
-      swReg.active.postMessage({ type: 'FIREBASE_CONFIG', config: APP_CONFIG.firebase });
+    // IndexedDBに設定を保存（SWが閉じた状態で起動したときに使う）
+    saveFirebaseConfigToDB(APP_CONFIG.firebase);
+
+    // Service WorkerにFirebase設定を渡す（全状態に対応）
+    const sendConfig = (sw) => sw.postMessage({ type: 'FIREBASE_CONFIG', config: APP_CONFIG.firebase });
+    if (swReg.active)    sendConfig(swReg.active);
+    if (swReg.waiting)   sendConfig(swReg.waiting);
+    if (swReg.installing) {
+      swReg.installing.addEventListener('statechange', function() {
+        if (this.state === 'activated') sendConfig(this);
+      });
     }
     swReg.addEventListener('updatefound', () => {
       const newSW = swReg.installing;
       newSW.addEventListener('statechange', () => {
-        if (newSW.state === 'activated') {
-          newSW.postMessage({ type: 'FIREBASE_CONFIG', config: APP_CONFIG.firebase });
-        }
+        if (newSW.state === 'activated') sendConfig(newSW);
       });
     });
 
