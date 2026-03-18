@@ -345,6 +345,41 @@
   .select-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:15px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); width:100%; margin-bottom:8px; }
   .textarea-input { border:1.5px solid var(--border); border-radius:8px; padding:9px 12px; font-size:14px; font-family:inherit; outline:none; background:var(--bg); color:var(--text); width:100%; resize:none; min-height:80px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ログインボーナスモーダル */
+  @keyframes bonusPop { 0%{transform:scale(0.7);opacity:0} 70%{transform:scale(1.05)} 100%{transform:scale(1);opacity:1} }
+  @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .bonus-overlay {
+    position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .bonus-box {
+    background:var(--surface);border-radius:20px;padding:32px 24px;
+    text-align:center;max-width:300px;width:90%;
+    animation: bonusPop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    position:relative;
+  }
+  .bonus-emoji { font-size:52px; animation: floatY 2s ease-in-out infinite; display:block; margin-bottom:8px; }
+  .bonus-title { font-size:17px;font-weight:700;color:var(--accent);margin-bottom:4px; }
+  .bonus-streak { font-size:52px;font-weight:900;color:var(--accent2);line-height:1; }
+  .bonus-streak-label { font-size:13px;color:var(--text-muted);margin-bottom:12px; }
+  .bonus-msg { font-size:14px;color:var(--text);margin-bottom:20px;line-height:1.6; }
+  .bonus-btn {
+    background:var(--accent);color:#fff;border:none;border-radius:12px;
+    padding:11px 36px;font-size:15px;font-weight:600;cursor:pointer;
+    transition:opacity 0.15s;font-family:inherit;
+  }
+  .bonus-btn:active { opacity:0.7; }
+
+  /* たまにメッセージトースト */
+  #love-toast {
+    position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(12px);
+    background:var(--accent2);color:#fff;border-radius:20px;padding:10px 20px;
+    font-size:13px;font-weight:500;opacity:0;transition:all 0.3s ease;
+    z-index:998;pointer-events:none;text-align:center;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:80vw;
+  }
+  #love-toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
@@ -478,6 +513,7 @@
 </main>
 
 <div class="toast" id="toast"></div>
+<div id="love-toast"></div>
 
 <script>
 // ============================================================
@@ -501,6 +537,133 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ============================================================
+//  ログインボーナス
+// ============================================================
+const BONUS_STREAK_MESSAGES = {
+  1:   '🍯カル「また来た！なでて！！ちゅぱちゅぱ」',
+  3:   '🐱猫氏「…3日連続ね。まぁ、認めてあげてもよくてよ」',
+  7:   '🌀メイ「うにゃ！！1週間！！すごい！うにゃうにゃ！！」',
+  14:  '🐱猫氏「2週間連続……まぁ、悪くないわね。特別に認めてあげるわ」',
+  30:  '🍯カル「1ヶ月！！ちゅぱちゅぱ！！僕のこと好きでしょ！！ちゅぱちゅぱ！！」',
+  100: '🐱猫氏「…100日。あなた、なかなかやるわね。……ありがとう」',
+};
+
+function getBonusStreakEmoji(streak) {
+  if (streak >= 100) return '🐱';
+  if (streak >= 30)  return '🍯';
+  if (streak >= 14)  return '🐱';
+  if (streak >= 7)   return '🌀';
+  if (streak >= 3)   return '🐱';
+  return '🍯';
+}
+
+function getBonusStreakMessage(streak) {
+  const keys = Object.keys(BONUS_STREAK_MESSAGES).map(Number).sort((a,b) => b-a);
+  for (const k of keys) {
+    if (streak >= k) return BONUS_STREAK_MESSAGES[k];
+  }
+  return '🍯カル「また来た！なでて！！ちゅぱちゅぱ」';
+}
+
+async function checkLoginBonus(user) {
+  const today = new Date().toISOString().slice(0, 10);
+  let data = { lastDate: null, streak: 0, totalDays: 0 };
+
+  if (db) {
+    const snap = await db.ref('loginBonus/' + user).once('value');
+    if (snap.val()) data = snap.val();
+  } else {
+    const stored = localStorage.getItem('futari_loginBonus_' + user);
+    if (stored) { try { data = JSON.parse(stored); } catch(e) {} }
+  }
+
+  if (data.lastDate === today) return; // 今日はもう表示済み
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  data.streak    = (data.lastDate === yesterday) ? (data.streak || 0) + 1 : 1;
+  data.totalDays = (data.totalDays || 0) + 1;
+  data.lastDate  = today;
+
+  if (db) {
+    db.ref('loginBonus/' + user).set(data);
+  } else {
+    localStorage.setItem('futari_loginBonus_' + user, JSON.stringify(data));
+  }
+
+  setTimeout(() => showBonusModal(user, data.streak, data.totalDays), 800);
+}
+
+function showBonusModal(user, streak, totalDays) {
+  const emoji = getBonusStreakEmoji(streak);
+  const msg   = getBonusStreakMessage(streak);
+  const overlay = document.createElement('div');
+  overlay.className = 'bonus-overlay';
+  overlay.innerHTML = `
+    <div class="bonus-box">
+      <span class="bonus-emoji">${emoji}</span>
+      <div class="bonus-title">ログインボーナス！</div>
+      <div class="bonus-streak">${streak}</div>
+      <div class="bonus-streak-label">日連続ログイン中 🔥（累計${totalDays}日）</div>
+      <div class="bonus-msg">${msg}</div>
+      <button class="bonus-btn" onclick="this.closest('.bonus-overlay').remove()">やったー！</button>
+    </div>
+  `;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+// ============================================================
+//  たまにメッセージ
+// ============================================================
+const FUN_MESSAGES = [
+  // 🍯 カル（甘えん坊王子）
+  '🍯カル「僕が甘えん坊王子だぞ！なでて！！」',
+  '🍯カル「猫氏さんのごはん、おいしかった。僕にはふさわしい食事だった」',
+  '🍯カル「ここに座ってもいい？……もう座った！」',
+  '🍯カル「なでてくれないの？なんで？僕は甘えん坊王子だぞ？」',
+  '🍯カル「猫氏さんに逃げられた！……でも僕のことは好きなはず！」',
+  '🍯カル「ご飯もう一回出してほしいんだけど、なんで出てこないの？」',
+  '🍯カル「メイが遊んでくれない。なんで？ちゅぱちゅぱ」',
+  '🍯カル「抱っこしてくれないの？僕かわいいのに！ちゅぱちゅぱ」',
+  '🍯カル「今日も1日最高だった！ちゅぱちゅぱ」',
+  '🍯カル「猫氏さんってなんで僕より偉いの？……まぁいいか。ちゅぱちゅぱ」',
+  // 🐱 猫氏（余裕の孤高女王）
+  '🐱猫氏「長く生きていると、色々どうでもよくなるものよ。まぁ、それが正解ね」',
+  '🐱猫氏「カルがまた私のご飯を食べてるわ。あとで人間に出してもらう必要があるわね」',
+  '🐱猫氏「若い子は元気ね。まぁ、許すわ」',
+  '🐱猫氏「ここ、私の場所なのだけれど。……まぁ、今日は譲ってあげるわ」',
+  '🐱猫氏「撫でていいわよ。五回までね。それ以上は、許してないわ」',
+  '🐱猫氏「私、今日は日当たりのいい場所を確保できたの。完璧な一日ね」',
+  '🐱猫氏「人間が心配そうにしてるわ。……まぁ、私はいつも通りよ。安心なさい」',
+  '🐱猫氏「カルはああいう子なのよ。まぁ……憎めないのが困りものだわ」',
+  // 🌀 メイ（うにゃ口癖・お転婆）
+  '🌀メイ「うにゃ！！あれ動いた！！うちが捕まえる！！」',
+  '🌀メイ「うにゃ……カルどこ行ったの。遊ぼうとしてるのに！」',
+  '🌀メイ「うにゃ？これなに？食べる？食べた！」',
+  '🌀メイ「走ってきた！うにゃ！理由はない！！」',
+  '🌀メイ「うにゃうにゃ……猫氏さんのそばに行きたい……でも怖い……うにゃ」',
+  '🌀メイ「この箱うちのもの！うにゃ！カルに渡さない！」',
+  '🌀メイ「なでて！うにゃ！……もういい！（走り去る）」',
+  '🌀メイ「うにゃ！！紐だ！！世界で一番大事なもの発見した！！」',
+  '🌀メイ「猫氏さんってなんでそんなに落ち着いてるの？うにゃ？」',
+  '🌀メイ「うにゃ～～～……（突然眠る）」',
+];
+
+function showLoveToast(msg) {
+  const el = document.getElementById('love-toast');
+  if (!el) return;
+  el.textContent = '💌 ' + msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+function maybeShowFunMessage() {
+  if (Math.random() > 0.15) return; // 15%の確率で表示
+  const msg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
+  setTimeout(() => showLoveToast(msg), 500);
 }
 function setSyncStatus(status, label) {
   document.getElementById('sync-dot').className = 'sync-dot ' + status;
@@ -641,6 +804,9 @@ async function initialLoad() {
     document.getElementById('gcal-bar').style.display = 'flex';
     loadGcalEvents();
   }
+
+  // ログインボーナスチェック
+  setTimeout(() => checkLoginBonus(currentUser), 500);
 }
 
 // ============================================================
@@ -654,6 +820,8 @@ function setUser(u) {
   if (typeof fcmToken !== 'undefined' && fcmToken && db) {
     db.ref('fcmTokens/' + u).set({ token: fcmToken, updatedAt: Date.now() });
   }
+  // ログインボーナスチェック（ユーザー切り替え時）
+  checkLoginBonus(u);
 }
 
 function showTab(tab) {
@@ -709,6 +877,7 @@ async function sendChat() {
     await fbSet('chat', state.chat);
     renderChat();
   }
+  maybeShowFunMessage();
 }
 
 // ============================================================
