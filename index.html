@@ -545,7 +545,12 @@ function getBonusStreakMessage(streak) {
   return '🍯カル「また来た！なでて！！ちゅぱちゅぱ」';
 }
 
+const _bonusShownThisSession = new Set(); // 同一セッション内での二重表示防止
+
 async function checkLoginBonus(user) {
+  if (_bonusShownThisSession.has(user)) return; // 既にこのセッションで表示済み
+  _bonusShownThisSession.add(user); // 先に登録して並列呼び出しをブロック
+
   const today = new Date().toISOString().slice(0, 10);
   let data = { lastDate: null, streak: 0, totalDays: 0 };
 
@@ -637,8 +642,13 @@ function showLoveToast(msg) {
   setTimeout(() => el.classList.remove('show'), 3500);
 }
 
+let _lastFunMessageAt = 0;
 function maybeShowFunMessage() {
-  if (Math.random() > 0.15) return; // 15%の確率で表示
+  const now = Date.now();
+  const cooldown = 3 * 60 * 1000; // 最低3分は出さない
+  if (now - _lastFunMessageAt < cooldown) return;
+  if (Math.random() > 0.3) return; // クールダウン明け後、30%の確率で表示
+  _lastFunMessageAt = now;
   const msg = FUN_MESSAGES[Math.floor(Math.random() * FUN_MESSAGES.length)];
   setTimeout(() => showLoveToast(msg), 500);
 }
