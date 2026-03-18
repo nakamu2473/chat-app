@@ -1073,18 +1073,26 @@ async function delEvent(id) {
 // ============================================================
 //  GOOGLE CALENDAR (iCal 読み込み)
 // ============================================================
-// CORS回避のためcorsproxy.io経由で取得
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXIES = [
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+];
 
 async function fetchIcal(url) {
-  const res = await fetch(CORS_PROXY + encodeURIComponent(url));
-  if (!res.ok) throw new Error('fetch failed: ' + res.status);
-  return res.text();
+  for (const proxy of CORS_PROXIES) {
+    try {
+      const res = await fetch(proxy(url));
+      if (res.ok) return res.text();
+    } catch(e) {}
+  }
+  throw new Error('全プロキシで取得失敗');
 }
 
 function parseIcal(text, calName) {
   const events = [];
-  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+  // iCal line folding を展開（RFC 5545: CRLF + whitespace で折り返し）
+  const unfolded = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').replace(/\n[ \t]/g,'');
+  const lines = unfolded.split('\n');
   let ev = null;
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
