@@ -538,7 +538,6 @@ function showToast(msg) {
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
 }
-
 // ============================================================
 //  ログインボーナス
 // ============================================================
@@ -1313,9 +1312,7 @@ async function uploadPhoto(input) {
   try {
     const photoId = uid();
     const ext = file.name.split('.').pop();
-    const ref = storage.ref(`photos/${photoId}.${ext}`);
-    await ref.put(file);
-    const url = await ref.getDownloadURL();
+    const url = await uploadToStorage(file, `photos/${photoId}.${ext}`);
 
     const now = new Date();
     const dateStr = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
@@ -1834,19 +1831,18 @@ async function saveCatProfile(catId) {
 async function uploadCatIcon(catId, input) {
   const file = input.files[0];
   if (!file) return;
-  if (!APP_CONFIG || !APP_CONFIG.cloudinary) { showToast('Cloudinaryが設定されてないよ'); return; }
+  if (!storage) { showToast('Firebase Storageが設定されてないよ'); return; }
   showToast('アップロード中…');
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', APP_CONFIG.cloudinary.uploadPreset);
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudinary.cloudName}/image/upload`, { method:'POST', body:fd });
-  const data = await res.json();
-  if (data.secure_url) {
-    const prof = { ...getCatProfile(catId), icon_url: data.secure_url };
-    if (db) await db.ref(`cats/${catId}/profile`).update({ icon_url: data.secure_url });
-    else { if(!state.cats[catId]) state.cats[catId]={}; state.cats[catId].profile = prof; }
+  try {
+    const ext = file.name.split('.').pop();
+    const url = await uploadToStorage(file, `cats/${catId}/icon.${ext}`);
+    if (db) await db.ref(`cats/${catId}/profile`).update({ icon_url: url });
+    else { if(!state.cats[catId]) state.cats[catId]={}; state.cats[catId].profile = {...getCatProfile(catId), icon_url: url}; }
     showToast('アイコンを更新したよ！');
     renderCatDetail();
+  } catch(e) {
+    console.error(e);
+    showToast('アップロードに失敗したよ…');
   }
 }
 
@@ -2115,14 +2111,13 @@ function showAddVisitModal(catId) {
   `, async () => {
     const photos = [];
     const files = document.getElementById('visit-photo-input').files;
-    if (files.length && APP_CONFIG && APP_CONFIG.cloudinary) {
+    if (files.length && storage) {
       for (const file of files) {
-        const fd = new FormData();
-        fd.append('file', file);
-        fd.append('upload_preset', APP_CONFIG.cloudinary.uploadPreset);
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${APP_CONFIG.cloudinary.cloudName}/image/upload`, { method:'POST', body:fd });
-        const data = await res.json();
-        if (data.secure_url) photos.push(data.secure_url);
+        try {
+          const ext = file.name.split('.').pop();
+          const url = await uploadToStorage(file, `visits/${catId}/${uid()}.${ext}`);
+          photos.push(url);
+        } catch(e) { console.error('visit photo upload error:', e); }
       }
     }
     const visit = {
@@ -2325,6 +2320,14 @@ function showPWAInstallHint() {
   }
 }
 
+
+// ===== Firebase Storage アップロード共通関数 =====
+async function uploadToStorage(file, path) {
+  if (!storage) throw new Error('Firebase Storageが初期化されてないよ');
+  const ref = storage.ref(path);
+  await ref.put(file);
+  return await ref.getDownloadURL();
+}
 // ============================================================
 //  INIT
 // ============================================================
