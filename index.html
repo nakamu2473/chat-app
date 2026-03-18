@@ -196,8 +196,11 @@
   .tag-filter-bar::-webkit-scrollbar { display:none; }
   .tag-chip { padding:4px 12px; border-radius:20px; border:1.5px solid var(--border); background:transparent; font-size:12px; font-family:inherit; cursor:pointer; white-space:nowrap; color:var(--text-muted); transition:all 0.15s; flex-shrink:0; }
   .tag-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
-  .photo-tags { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; }
+  .photo-tags-row { display:flex; gap:4px; flex-wrap:wrap; margin-top:6px; align-items:center; }
   .photo-tag { font-size:10px; background:var(--accent-light); color:var(--accent); border-radius:8px; padding:2px 7px; font-weight:600; }
+  .photo-tag-empty { font-size:10px; color:var(--text-muted); }
+  .tag-edit-btn { background:none; border:none; font-size:13px; cursor:pointer; padding:1px 3px; opacity:0.6; flex-shrink:0; }
+  .tag-edit-btn:hover { opacity:1; }
   /* ALBUM */
   .album-toolbar { padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
   .album-sort-btns { display: flex; gap: 6px; }
@@ -658,9 +661,13 @@ if (useFirebase) {
   try {
     firebase.initializeApp(APP_CONFIG.firebase);
     db = firebase.database();
-    storage = firebase.storage();
   } catch(e) {
     console.error('Firebase init error:', e);
+  }
+  try {
+    storage = firebase.storage();
+  } catch(e) {
+    console.warn('Firebase Storage init error（config.jsにstorageBucketが設定されているか確認してね）:', e);
   }
 } else {
   document.getElementById('demo-banner').style.display = 'block';
@@ -1168,7 +1175,10 @@ function renderAlbum() {
       <img class="photo-img" src="${p.url}" loading="lazy" onclick="openPhotoOverlay('${p.id}')" />
       <div class="photo-info">
         ${p.caption ? `<div class="photo-caption">${esc(p.caption)}</div>` : ''}
-        ${p.tags && p.tags.length ? `<div class="photo-tags">${p.tags.map(t=>`<span class="photo-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+        <div class="photo-tags-row">
+          ${p.tags && p.tags.length ? p.tags.map(t=>`<span class="photo-tag">${esc(t)}</span>`).join('') : '<span class="photo-tag-empty">タグなし</span>'}
+          <button class="tag-edit-btn" onclick="editPhotoTags('${p.id}')">🏷️</button>
+        </div>
         <div class="photo-meta">
           <span class="photo-who">${esc(p.who)}</span>
           <span class="photo-date">${p.dateStr || ''}</span>
@@ -1202,9 +1212,11 @@ function setAlbumTagFilter(tag) {
   renderAlbum();
 }
 
-function showTagSelectModal() {
+function showTagSelectModal(initialTags = []) {
   return new Promise(resolve => {
-    const selected = new Set();
+    const selected = new Set(initialTags);
+    // カスタムタグがあればPRESET_TAGSに追加して表示
+    initialTags.filter(t => !PRESET_TAGS.includes(t)).forEach(t => PRESET_TAGS.push(t));
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     const renderChips = () => {
@@ -1247,7 +1259,7 @@ async function uploadPhoto(input) {
   if (selectedTags === null) { input.value = ''; return; } // キャンセル
 
   if (!storage) {
-    showToast('Firebase Storageが設定されてないよ');
+    showToast('Firebase Storageが使えないよ（config.jsのstorageBucketを確認してね）');
     input.value = '';
     return;
   }
@@ -1312,6 +1324,19 @@ async function delPhoto(id) {
   } else {
     renderAlbum();
   }
+}
+
+async function editPhotoTags(id) {
+  const photo = (state.photos || []).find(p => p.id === id);
+  if (!photo) return;
+  const newTags = await showTagSelectModal(photo.tags || []);
+  if (newTags === null) return; // キャンセル
+  photo.tags = newTags;
+  if (db) {
+    await db.ref('photos/' + id + '/tags').set(newTags.length ? newTags : null);
+  }
+  renderAlbum();
+  showToast('🏷️ タグを更新したよ！');
 }
 
 function openPhotoOverlay(id) {
@@ -1687,7 +1712,7 @@ async function saveCatProfile(catId) {
 async function uploadCatIcon(catId, input) {
   const file = input.files[0];
   if (!file) return;
-  if (!storage) { showToast('Firebase Storageが設定されてないよ'); return; }
+  if (!storage) { showToast('Firebase Storageが使えないよ（config.jsのstorageBucketを確認してね）'); return; }
   showToast('アップロード中…');
   try {
     const ext = file.name.split('.').pop();
