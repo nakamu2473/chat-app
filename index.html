@@ -21,6 +21,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
 <!-- 設定ファイル（config.js が存在しない場合はデモモードで動作） -->
 <script>
@@ -380,9 +381,68 @@
     box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:80vw;
   }
   #love-toast.show { opacity:1;transform:translateX(-50%) translateY(0); }
+
+  /* LOGIN SCREEN */
+  #login-screen {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 28px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .login-card h2 { font-size: 20px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+  .login-card p.sub { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+  .google-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: 100%; padding: 12px 16px;
+    border: 1.5px solid var(--border); border-radius: 24px;
+    background: #fff; font-size: 14px; font-family: inherit;
+    cursor: pointer; color: var(--text); font-weight: 500;
+    transition: box-shadow 0.2s;
+  }
+  .google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .google-btn svg { flex-shrink: 0; }
+  #login-error { font-size: 12px; color: var(--danger); margin-top: 14px; min-height: 16px; }
+
+  /* LOGOUT BUTTON */
+  .logout-btn {
+    padding: 4px 10px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: transparent;
+    font-size: 11px; font-family: inherit; cursor: pointer;
+    color: var(--text-muted); transition: all 0.18s;
+  }
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
+  .current-user-label {
+    font-size: 13px; font-weight: 600; color: var(--accent);
+  }
 </style>
 </head>
 <body>
+
+<!-- ログイン画面 -->
+<div id="login-screen">
+  <div class="login-card">
+    <h2>🏠 ふたりのアプリ</h2>
+    <p class="sub">Googleアカウントでログインしてね</p>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+      Googleでログイン
+    </button>
+    <p id="login-error"></p>
+  </div>
+</div>
 
 <!-- config.js がない場合のデモバナー（JS で制御） -->
 <div class="demo-banner" id="demo-banner" style="display:none;">
@@ -396,9 +456,12 @@
       <div class="sync-dot" id="sync-dot"></div>
       <span id="sync-label">起動中…</span>
     </div>
-    <div class="user-switch">
-      <button class="user-btn active" onclick="setUser('ゆき')">ゆき</button>
-      <button class="user-btn" onclick="setUser('たけ')">たけ</button>
+    <div class="user-switch" id="user-area">
+      <span class="current-user-label" id="current-user-label"></span>
+      <button class="logout-btn" onclick="signOut()" id="logout-btn" style="display:none;">ログアウト</button>
+      <!-- デモモード用フォールバック -->
+      <button class="user-btn active" id="demo-user-yuki" onclick="setUser('ゆき')" style="display:none;">ゆき</button>
+      <button class="user-btn" id="demo-user-take" onclick="setUser('たけ')" style="display:none;">たけ</button>
     </div>
   </div>
 </header>
@@ -2231,6 +2294,68 @@ function showModal(bodyHtml, onOk) {
   document.body.appendChild(overlay);
 }
 // ============================================================
+//  FIREBASE AUTH
+// ============================================================
+const EMAIL_TO_USER = {
+  'yka06398@gmail.com': 'たけ',
+  'oyukita56@gmail.com': 'ゆき',
+};
+
+let auth = null;
+
+function initAuth() {
+  // Firebase未使用（デモモード）はユーザー切り替えボタンを表示
+  if (!useFirebase || !APP_CONFIG) {
+    document.getElementById('demo-user-yuki').style.display = '';
+    document.getElementById('demo-user-take').style.display = '';
+    return;
+  }
+  auth = firebase.auth();
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      const mappedUser = EMAIL_TO_USER[user.email];
+      if (mappedUser) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('current-user-label').textContent = mappedUser;
+        document.getElementById('logout-btn').style.display = '';
+        setUser(mappedUser);
+      } else {
+        // 未登録メール → サインアウト
+        auth.signOut();
+        showLoginScreen('このアカウントは登録されていません');
+      }
+    } else {
+      showLoginScreen('');
+    }
+  });
+}
+
+async function signInWithGoogle() {
+  const btn = document.querySelector('.google-btn');
+  btn.disabled = true;
+  btn.textContent = 'ログイン中…';
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch(e) {
+    document.getElementById('login-error').textContent = 'ログインに失敗しました';
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg> Googleでログイン`;
+  }
+}
+
+function showLoginScreen(msg) {
+  document.getElementById('current-user-label').textContent = '';
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-error').textContent = msg;
+}
+
+async function signOut() {
+  if (auth) await auth.signOut();
+}
+
+// ============================================================
 //  FCM / PWA / PUSH通知
 // ============================================================
 let messaging = null;
@@ -2333,6 +2458,7 @@ async function uploadToStorage(file, path) {
 // ============================================================
 initCal();
 initialLoad();
+initAuth();
 setTimeout(initFCM, 1500);
 setTimeout(showPWAInstallHint, 3000);
 </script>
