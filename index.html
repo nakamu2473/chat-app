@@ -354,7 +354,7 @@
   @keyframes floatY { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
   .bonus-overlay {
     position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;
-    display:flex;align-items:center;justify-content:center;
+    display:flex;align-items:flex-start;justify-content:center;padding-top:60px;
   }
   .bonus-box {
     background:var(--surface);border-radius:20px;padding:32px 24px;
@@ -376,7 +376,7 @@
 
   /* たまにメッセージトースト */
   #love-toast {
-    position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(12px);
+    position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-12px);
     background:var(--accent2);color:#fff;border-radius:20px;padding:10px 20px;
     font-size:13px;font-weight:500;opacity:0;transition:all 0.3s ease;
     z-index:998;pointer-events:none;text-align:center;
@@ -724,7 +724,7 @@ const FUN_MESSAGES = [
 function showLoveToast(msg) {
   const el = document.getElementById('love-toast');
   if (!el) return;
-  el.textContent = '💌 ' + msg;
+  el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 3500);
 }
