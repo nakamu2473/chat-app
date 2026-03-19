@@ -2355,13 +2355,15 @@ async function signInWithGoogle() {
   btn.textContent = 'ログイン中…';
   const provider = new firebase.auth.GoogleAuthProvider();
 
-  // iOSのPWA（ホーム画面追加）モードではsignInWithRedirectがSafariを別タブで
-  // 開いてしまい、リダイレクト結果がPWAに戻らないためポップアップを使う
+  // SafariはITP（Intelligent Tracking Prevention）により signInWithRedirect の
+  // リダイレクト経路（firebaseapp.com）のストレージをブロックし認証結果が消える。
+  // iOS PWAのstandaloneモードも同様にredirectが外部Safariで開いてしまい結果が戻らない。
+  // → Safari系 / iOS は全て signInWithPopup を使う（ボタンクリック直後なので許可される）
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const isStandalone = window.navigator.standalone === true;
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
   try {
-    if (isIOS && isStandalone) {
+    if (isIOS || isSafari) {
       await auth.signInWithPopup(provider);
     } else {
       await auth.signInWithRedirect(provider);
