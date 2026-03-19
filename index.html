@@ -117,6 +117,7 @@
   .msg-bubble { padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.5; word-break: break-word; }
   .msg-wrap.me .msg-bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
   .msg-wrap.other .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .msg-bubble a { color: inherit; text-decoration: underline; word-break: break-all; }
   .msg-time { font-size: 10px; color: var(--text-muted); margin-top: 3px; font-family: 'DM Mono', monospace; }
 
   /* SHOP */
@@ -594,6 +595,16 @@ function fmtTime(d) {
 function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
+function linkify(text) {
+  const parts = String(text).split(/(https?:\/\/[^\s]+)/);
+  return parts.map((part, i) => {
+    if (i % 2 === 1) {
+      const escaped = esc(part);
+      return `<a href="${escaped}" target="_blank" rel="noopener noreferrer">${escaped}</a>`;
+    }
+    return esc(part);
+  }).join('');
+}
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
 }
@@ -930,7 +941,7 @@ function renderChat() {
   }
   el.innerHTML = state.chat.map(m => `
     <div class="msg-wrap ${m.user === currentUser ? 'me' : 'other'}">
-      <div class="msg-bubble">${esc(m.text)}</div>
+      <div class="msg-bubble">${linkify(m.text)}</div>
       <div class="msg-time">${esc(m.time)}</div>
     </div>
   `).join('');

@@ -5,7 +5,15 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-comp
 
 // 新バージョンのSWをすぐに有効化する（古いキャッシュを残さない）
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    Promise.all([
+      clients.claim(),
+      // プッシュが来る前にFirebaseを初期化しておく
+      loadConfigFromDB().then(config => { if (config) initFirebaseWithConfig(config); }),
+    ])
+  );
+});
 
 let messaging = null;
 
@@ -57,14 +65,24 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// アプリが閉じているときにプッシュが来た場合、IndexedDBから設定を読んで初期化
+// アプリが閉じているときにプッシュが来た場合の処理
 self.addEventListener('push', (event) => {
-  if (firebase.apps.length) return; // 既に初期化済みならスキップ
-  event.waitUntil(
-    loadConfigFromDB().then((config) => {
-      if (config) initFirebaseWithConfig(config);
-    })
-  );
+  // 既に初期化済みならFirebase SDKに任せる
+  if (firebase.apps.length) return;
+
+  event.waitUntil((async () => {
+    const config = await loadConfigFromDB();
+    if (config) {
+      initFirebaseWithConfig(config);
+      // SDKのpushリスナーはこのイベントには間に合わないため直接通知を表示
+    }
+    await self.registration.showNotification('ふたりのアプリ', {
+      body: '新しいメッセージがあるよ',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
+    });
+  })());
 });
 
 // 通知クリック時にアプリを開く
