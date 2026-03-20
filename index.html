@@ -2404,17 +2404,6 @@ async function signOut() {
 let messaging = null;
 let fcmToken = null;
 
-// Firebase設定をIndexedDBに保存（SWがアプリ閉じてる状態でも使えるように）
-function saveFirebaseConfigToDB(config) {
-  try {
-    const req = indexedDB.open('futari-sw-config', 1);
-    req.onupgradeneeded = (e) => e.target.result.createObjectStore('config');
-    req.onsuccess = (e) => {
-      const idb = e.target.result;
-      idb.transaction('config', 'readwrite').objectStore('config').put(config, 'firebase');
-    };
-  } catch(e) {}
-}
 
 async function initFCM() {
   if (!useFirebase || !db) return;
@@ -2423,25 +2412,6 @@ async function initFCM() {
   try {
     // Service Worker 登録
     const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
-    // IndexedDBに設定を保存（SWが閉じた状態で起動したときに使う）
-    saveFirebaseConfigToDB(APP_CONFIG.firebase);
-
-    // Service WorkerにFirebase設定を渡す（全状態に対応）
-    const sendConfig = (sw) => sw.postMessage({ type: 'FIREBASE_CONFIG', config: APP_CONFIG.firebase });
-    if (swReg.active)    sendConfig(swReg.active);
-    if (swReg.waiting)   sendConfig(swReg.waiting);
-    if (swReg.installing) {
-      swReg.installing.addEventListener('statechange', function() {
-        if (this.state === 'activated') sendConfig(this);
-      });
-    }
-    swReg.addEventListener('updatefound', () => {
-      const newSW = swReg.installing;
-      newSW.addEventListener('statechange', () => {
-        if (newSW.state === 'activated') sendConfig(newSW);
-      });
-    });
 
     messaging = firebase.messaging();
 
@@ -2460,11 +2430,13 @@ async function initFCM() {
       console.log('FCMトークン登録完了だっちゃ');
     }
 
-    // フォアグラウンド通知
-    messaging.onMessage((payload) => {
-      const { title, body } = payload.notification || {};
-      // アプリが開いてるときはトースト表示
-      showToast((title || '') + ' ' + (body || ''));
+    // SWからのフォアグラウンド通知（Chrome・Safari共通）
+    // ※ messaging.onMessage() はSafariで動作しないためSWのpostMessageで受け取る
+    navigator.serviceWorker.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'PUSH_RECEIVED') {
+        const { title, body } = event.data;
+        showToast((title || '') + (body ? ' ' + body : ''));
+      }
     });
 
   } catch(e) {
