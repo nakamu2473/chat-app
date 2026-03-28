@@ -2434,12 +2434,6 @@ async function initFCM() {
       }
     });
 
-    // トークンリフレッシュ時に自動再登録
-    messaging.onTokenRefresh(async () => {
-      console.log('FCMトークンがリフレッシュされたので再登録するよ');
-      await registerFCMToken();
-    });
-
     // 既に許可済みならトークン登録
     if (Notification.permission === 'granted') {
       await registerFCMToken();
