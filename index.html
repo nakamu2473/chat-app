@@ -1203,14 +1203,19 @@ async function delEvent(id) {
 const CORS_PROXIES = [
   u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
   u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+  u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+  u => 'https://thingproxy.freeboard.io/fetch/' + u,
 ];
 
 async function fetchIcal(url) {
   for (const proxy of CORS_PROXIES) {
     try {
-      const res = await fetch(proxy(url));
-      if (res.ok) return res.text();
-    } catch(e) {}
+      const res = await fetch(proxy(url), { signal: AbortSignal.timeout(8000) });
+      if (!res.ok) { console.warn('iCal proxy failed:', res.status, proxy(url)); continue; }
+      const text = await res.text();
+      if (text.includes('BEGIN:VCALENDAR')) return text;
+      console.warn('iCal proxy returned non-ical content');
+    } catch(e) { console.warn('iCal proxy error:', e.message); }
   }
   throw new Error('全プロキシで取得失敗');
 }
