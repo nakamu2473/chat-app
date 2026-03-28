@@ -481,6 +481,11 @@
 <main>
   <!-- CHAT -->
   <div class="page active" id="page-chat">
+    <div id="notif-banner" style="display:none;background:#fff3cd;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ffc107;">
+      <span style="flex:1">🔔 通知が無効です</span>
+      <button onclick="enableNotifications()" style="background:#ffc107;border:none;border-radius:6px;padding:4px 10px;font-size:13px;cursor:pointer;">有効にする</button>
+      <button onclick="document.getElementById('notif-banner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;padding:0 4px;">✕</button>
+    </div>
     <div class="section-inner" id="chat-scroll" ontouchstart="document.activeElement.blur()">
       <div class="chat-messages" id="chat-messages"></div>
     </div>
@@ -2410,33 +2415,18 @@ let messaging = null;
 let fcmToken = null;
 
 
+let swReg = null;
+
 async function initFCM() {
   if (!useFirebase || !db) return;
   if (!APP_CONFIG.fcm || !APP_CONFIG.fcm.vapidKey || APP_CONFIG.fcm.vapidKey === 'YOUR_VAPID_KEY') return;
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
 
   try {
-    // Service Worker 登録
-    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-
+    swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
     messaging = firebase.messaging();
 
-    // 通知許可をリクエスト
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') {
-      console.log('通知許可が得られなかっただっちゃ');
-      return;
-    }
-
-    // FCMトークン取得
-    fcmToken = await messaging.getToken({ vapidKey: APP_CONFIG.fcm.vapidKey, serviceWorkerRegistration: swReg });
-    if (fcmToken) {
-      // トークンをFirebaseに保存（ユーザーと紐付け）
-      await db.ref('fcmTokens/' + currentUser).set({ token: fcmToken, updatedAt: Date.now() });
-      console.log('FCMトークン登録完了だっちゃ');
-    }
-
     // SWからのフォアグラウンド通知（Chrome・Safari共通）
-    // ※ messaging.onMessage() はSafariで動作しないためSWのpostMessageで受け取る
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'PUSH_RECEIVED') {
         const { title, body } = event.data;
@@ -2444,8 +2434,38 @@ async function initFCM() {
       }
     });
 
+    // 既に許可済みならトークン登録
+    if (Notification.permission === 'granted') {
+      await registerFCMToken();
+    } else if (Notification.permission === 'default') {
+      // 未決定 → バナーを表示してユーザーに促す
+      document.getElementById('notif-banner').style.display = 'flex';
+    }
   } catch(e) {
     console.warn('FCM init error:', e);
+  }
+}
+
+// ユーザー操作から呼ぶ（Safari対応）
+async function enableNotifications() {
+  document.getElementById('notif-banner').style.display = 'none';
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    await registerFCMToken();
+    showToast('🔔 通知を有効にしたよ！');
+  }
+}
+
+async function registerFCMToken() {
+  if (!messaging || !swReg || !currentUser) return;
+  try {
+    fcmToken = await messaging.getToken({ vapidKey: APP_CONFIG.fcm.vapidKey, serviceWorkerRegistration: swReg });
+    if (fcmToken) {
+      await db.ref('fcmTokens/' + currentUser).set({ token: fcmToken, updatedAt: Date.now() });
+      console.log('FCMトークン登録完了だっちゃ');
+    }
+  } catch(e) {
+    console.warn('FCMトークン取得エラー:', e);
   }
 }
 
