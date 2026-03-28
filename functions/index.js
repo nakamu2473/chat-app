@@ -14,13 +14,15 @@ exports.sendChatNotification = functions.database.ref('/chat/{messageId}')
     // 全ユーザーのFCMトークンを取得
     const tokensSnap = await admin.database().ref('fcmTokens').once('value');
     const tokens = tokensSnap.val();
+    console.log('送信者:', sender, '/ 登録トークン数:', tokens ? Object.keys(tokens).length : 0);
     if (!tokens) return null;
 
-    // 送信者以外のトークンへ通知を送る
+    // 全トークンへ通知を送る（送信者自身も含む・テスト用）
     const sends = Object.entries(tokens)
-      .filter(([user, data]) => user !== sender && data && data.token)
-      .map(([, data]) =>
-        admin.messaging().send({
+      .filter(([, data]) => data && data.token)
+      .map(([user, data]) => {
+        console.log('通知送信先:', user);
+        return admin.messaging().send({
           token: data.token,
           notification: {
             title: `${sender}からメッセージ`,
@@ -36,8 +38,8 @@ exports.sendChatNotification = functions.database.ref('/chat/{messageId}')
         }).catch((e) => {
           console.warn('FCM send error:', e.message);
           return null;
-        })
-      );
+        });
+      });
 
     return Promise.all(sends);
   });
