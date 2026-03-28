@@ -491,7 +491,7 @@
     </div>
     <div class="input-bar">
       <div class="input-wrap">
-        <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendChat()">
+        <input type="text" id="chat-input" placeholder="メッセージを入力…" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendChat()">
         <button class="btn-send" onclick="sendChat()">送信</button>
       </div>
     </div>
