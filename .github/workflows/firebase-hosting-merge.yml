@@ -13,9 +13,12 @@ jobs:
           cat << 'EOF' > config.js
           ${{ secrets.CONFIG_JS }}
           EOF
+      - name: Install Functions dependencies
+        run: npm ci --prefix functions
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CHAT_A23CE }}
           channelId: live
           projectId: chat-a23ce
+          targets: hosting,functions
