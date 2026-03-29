@@ -1,6 +1,6 @@
 # 🏠 ふたりのアプリ
 
-ゆき・たけ専用の共有アプリです。
+ふたり専用の共有アプリです。
 チャット / 買い物リスト / メモ・TODO / カレンダー が使えます。
 
 ## セットアップ
@@ -32,7 +32,7 @@ cp config.example.js config.js
 1. [Googleカレンダー](https://calendar.google.com/) を開く
 2. 左側のカレンダー名 → 「︙」→「設定と共有」
 3. 「カレンダーの統合」→「**シークレットアドレス（iCal形式）**」をコピー
-4. `config.js` の `calendars.yuki.icalUrl` / `calendars.take.icalUrl` に貼り付け
+4. `config.js` の `calendars` の各 `icalUrl` に貼り付け
 
 > ⚠️ シークレットアドレスは他人に見せないように注意してください
 

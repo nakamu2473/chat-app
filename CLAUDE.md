@@ -18,11 +18,11 @@
 
 ## プロジェクト概要
 
-**ふたりのアプリ** — ゆき・たけ専用のプライベートカップルアプリ。
+**ふたりのアプリ** — 2人専用のプライベートカップルアプリ。
 Firebase をバックエンドに使った PWA（Progressive Web App）。
 
 - **URL**: Firebase Hosting でデプロイ済み（プロジェクト ID: `chat-a23ce`）
-- **対象ユーザー**: 2名固定（`yuki` / `take`）
+- **対象ユーザー**: 2名固定
 
 ---
 
@@ -95,8 +95,8 @@ window.APP_CONFIG = {
   firebase: { apiKey, authDomain, databaseURL, projectId, storageBucket, messagingSenderId, appId },
   fcm: { vapidKey },
   calendars: {
-    yuki: { name, icalUrl },
-    take: { name, icalUrl },
+    user1: { name, icalUrl },
+    user2: { name, icalUrl },
   },
 };
 ```
