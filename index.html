@@ -2441,6 +2441,22 @@ async function initFCM() {
       // 未決定 → バナーを表示してユーザーに促す
       document.getElementById('notif-banner').style.display = 'flex';
     }
+
+    // トークンリフレッシュ対応（FCMがトークンを更新した場合に再登録）
+    if (messaging.onTokenRefresh) {
+      messaging.onTokenRefresh(() => {
+        console.log('FCMトークンがリフレッシュされた、再登録するよ');
+        registerFCMToken();
+      });
+    }
+
+    // アプリ復帰時にトークンを再登録（長時間離脱後のトークン期限切れ対策）
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && Notification.permission === 'granted') {
+        registerFCMToken();
+      }
+    });
+
   } catch(e) {
     console.warn('FCM init error:', e);
   }
