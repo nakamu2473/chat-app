@@ -191,7 +191,7 @@
   .empty { text-align: center; padding: 40px 20px; color: var(--text-muted); font-size: 13px; }
   .empty .big { font-size: 32px; margin-bottom: 8px; }
 
-  .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; font-size: 12px; padding: 8px 16px; border-radius: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; z-index: 999; }
+  .toast { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; font-size: 12px; padding: 8px 16px; border-radius: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s; white-space: nowrap; z-index: 999; }
   .toast.show { opacity: 1; }
 
 
@@ -377,7 +377,7 @@
 
   /* たまにメッセージトースト */
   #love-toast {
-    position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(12px);
+    position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-12px);
     background:var(--accent2);color:#fff;border-radius:20px;padding:10px 20px;
     font-size:13px;font-weight:500;opacity:0;transition:all 0.3s ease;
     z-index:998;pointer-events:none;text-align:center;
@@ -481,7 +481,7 @@
 <main>
   <!-- CHAT -->
   <div class="page active" id="page-chat">
-    <div id="notif-banner" style="display:none;background:#fff3cd;padding:8px 12px;font-size:13px;display:flex;align-items:center;gap:8px;border-bottom:1px solid #ffc107;">
+    <div id="notif-banner" style="display:none;background:#fff3cd;padding:8px 12px;font-size:13px;align-items:center;gap:8px;border-bottom:1px solid #ffc107;">
       <span style="flex:1">🔔 通知が無効です</span>
       <button onclick="enableNotifications()" style="background:#ffc107;border:none;border-radius:6px;padding:4px 10px;font-size:13px;cursor:pointer;">有効にする</button>
       <button onclick="document.getElementById('notif-banner').style.display='none'" style="background:none;border:none;font-size:16px;cursor:pointer;padding:0 4px;">✕</button>
@@ -491,7 +491,7 @@
     </div>
     <div class="input-bar">
       <div class="input-wrap">
-        <input type="text" id="chat-input" placeholder="メッセージを入力…" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendChat()">
+        <input type="text" id="chat-input" placeholder="メッセージを入力…" autocomplete="off" onkeydown="if(event.key==='Enter'&&!event.isComposing)sendChat()">
         <button class="btn-send" onclick="sendChat()">送信</button>
       </div>
     </div>
@@ -740,7 +740,7 @@ const FUN_MESSAGES = [
 function showLoveToast(msg) {
   const el = document.getElementById('love-toast');
   if (!el) return;
-  el.textContent = '💌 ' + msg;
+  el.textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 3500);
 }
