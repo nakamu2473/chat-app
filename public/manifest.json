@@ -1,7 +1,7 @@
 {
   "name": "ふたりのアプリ",
   "short_name": "ふたりのアプリ",
-  "description": "ふたりの共有アプリ",
+  "description": "ゆき・たけ専用の共有アプリ",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f6f3",

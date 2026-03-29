@@ -35,8 +35,18 @@ exports.sendChatNotification = functions.database.ref('/chat/{messageId}')
           android: {
             notification: { sound: 'default' },
           },
-        }).catch((e) => {
-          console.warn('FCM send error:', e.message);
+        }).catch(async (e) => {
+          console.warn('FCM send error:', user, e.message);
+          // 無効トークンは削除して次回以降のエラーを防ぐ
+          if (
+            e.code === 'messaging/registration-token-not-registered' ||
+            e.code === 'messaging/invalid-registration-token' ||
+            e.message?.includes('not-registered') ||
+            e.message?.includes('invalid-argument')
+          ) {
+            await admin.database().ref('fcmTokens/' + user).remove();
+            console.log('無効トークンを削除:', user);
+          }
           return null;
         });
       });
