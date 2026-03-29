@@ -19,6 +19,21 @@ export interface MemoItem {
   ts: number
 }
 
+export interface CalEvent {
+  id: string
+  date: string // YYYY-MM-DD
+  title: string
+  who: string
+  ts: number
+}
+
+export interface GcalEvent {
+  id: string
+  date: string // YYYY-MM-DD
+  title: string
+  who: string // calendar name
+}
+
 export interface ChatMessage {
   id: string
   user: string

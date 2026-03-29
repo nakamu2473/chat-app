@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
 import { useShopStore } from '@/stores/shop'
 import { useMemoStore } from '@/stores/memo'
+import { useCalendarStore } from '@/stores/calendar'
 import { initFirebase } from '@/firebase'
 import LoginScreen from '@/components/LoginScreen.vue'
 import AppHeader from '@/components/AppHeader.vue'
@@ -12,6 +13,7 @@ import TabNav from '@/components/TabNav.vue'
 import ChatView from '@/components/chat/ChatView.vue'
 import ShopView from '@/components/shop/ShopView.vue'
 import MemoView from '@/components/memo/MemoView.vue'
+import CalendarView from '@/components/calendar/CalendarView.vue'
 import PlaceholderView from '@/components/PlaceholderView.vue'
 
 const appStore = useAppStore()
@@ -19,6 +21,7 @@ const authStore = useAuthStore()
 const chatStore = useChatStore()
 const shopStore = useShopStore()
 const memoStore = useMemoStore()
+const calendarStore = useCalendarStore()
 
 onMounted(() => {
   initFirebase()
@@ -26,6 +29,7 @@ onMounted(() => {
   chatStore.startListener()
   shopStore.startListener()
   memoStore.startListener()
+  calendarStore.startListener()
 })
 </script>
 
@@ -37,7 +41,7 @@ onMounted(() => {
       <ChatView v-show="appStore.currentTab === 'chat'" />
       <ShopView v-show="appStore.currentTab === 'shop'" />
       <MemoView v-show="appStore.currentTab === 'memo'" />
-      <PlaceholderView v-show="appStore.currentTab === 'cal'"   label="カレンダー" />
+      <CalendarView v-show="appStore.currentTab === 'cal'" />
       <PlaceholderView v-show="appStore.currentTab === 'album'" label="アルバム" />
       <PlaceholderView v-show="appStore.currentTab === 'cats'"  label="ねこ" />
     </main>
