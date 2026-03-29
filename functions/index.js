@@ -18,6 +18,12 @@ exports.sendChatNotification = functions.database.ref('/chat/{messageId}')
     if (!tokens) return null;
 
     // 全トークンへ通知を送る（送信者自身も含む・テスト用）
+    const INVALID_TOKEN_CODES = [
+      'messaging/registration-token-not-registered',
+      'messaging/invalid-registration-token',
+      'messaging/invalid-argument',
+    ];
+
     const sends = Object.entries(tokens)
       .filter(([, data]) => data && data.token)
       .map(([user, data]) => {
@@ -36,7 +42,12 @@ exports.sendChatNotification = functions.database.ref('/chat/{messageId}')
             notification: { sound: 'default' },
           },
         }).catch((e) => {
-          console.warn('FCM send error:', e.message);
+          console.warn('FCM send error:', user, e.message);
+          // 無効なトークンはDBから削除して次回以降の送信エラーを防ぐ
+          if (INVALID_TOKEN_CODES.some(code => e.message.includes(code) || (e.errorInfo && e.errorInfo.code === code))) {
+            console.log('無効トークンを削除:', user);
+            return admin.database().ref('fcmTokens/' + user).remove();
+          }
           return null;
         });
       });
