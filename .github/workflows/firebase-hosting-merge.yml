@@ -17,6 +17,8 @@ jobs:
         run: npm ci
       - name: Build
         run: npm run build
+      - name: Copy config.js to dist
+        run: cp config.js dist/config.js
       - name: Install Functions dependencies
         run: npm ci --prefix functions
       - name: Deploy Functions
