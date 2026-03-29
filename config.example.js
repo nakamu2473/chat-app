@@ -25,12 +25,12 @@ window.APP_CONFIG = {
 
   // ---------- Googleカレンダー（読み込みのみ） ----------
   calendars: {
-    yuki: {
-      name: "ゆき",
+    user1: {
+      name: "ユーザー1",
       icalUrl: "https://calendar.google.com/calendar/ical/XXXXXXXX/private-XXXXXXXX/basic.ics",
     },
-    take: {
-      name: "たけ",
+    user2: {
+      name: "ユーザー2",
       icalUrl: "https://calendar.google.com/calendar/ical/XXXXXXXX/private-XXXXXXXX/basic.ics",
     },
   },
