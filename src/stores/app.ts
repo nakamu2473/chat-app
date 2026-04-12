@@ -7,6 +7,8 @@ export const useAppStore = defineStore('app', () => {
   const currentTab = ref<TabName>('chat')
   const isLoggedIn = ref(false)
   const syncStatus = ref<SyncStatus>('ok')
+  const toastMessage = ref<string | null>(null)
+  let toastTimer: ReturnType<typeof setTimeout> | null = null
 
   function setUser(user: UserName) {
     currentUser.value = user
@@ -24,5 +26,13 @@ export const useAppStore = defineStore('app', () => {
     syncStatus.value = status
   }
 
-  return { currentUser, currentTab, isLoggedIn, syncStatus, setUser, setTab, setLoggedIn, setSyncStatus }
+  function showToast(msg: string) {
+    if (toastTimer) clearTimeout(toastTimer)
+    toastMessage.value = msg
+    toastTimer = setTimeout(() => {
+      toastMessage.value = null
+    }, 2500)
+  }
+
+  return { currentUser, currentTab, isLoggedIn, syncStatus, toastMessage, setUser, setTab, setLoggedIn, setSyncStatus, showToast }
 })
